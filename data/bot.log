@@ -1,0 +1,53 @@
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Utilisateur 284323074784886785 (Chris Linefield) enregistré avec succès.
+Utilisateur 284323074784886785 (Chris Linefield) a complété son enregistrement.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Utilisateur 549295440139517952 (Bart Bernie) enregistré avec succès.
+Utilisateur 549295440139517952 (Bart Bernie) a complété son enregistrement.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+SCUM.db téléchargé avec succès.
+Erreur lors de la récupération du solde: (sqlite3.OperationalError) no such column: bank_account_registry_currencies.user_id
+[SQL: SELECT bank_account_registry_currencies.id AS bank_account_registry_currencies_id, bank_account_registry_currencies.user_id AS bank_account_registry_currencies_user_id, bank_account_registry_currencies.currency_type AS bank_account_registry_currencies_currency_type, bank_account_registry_currencies.account_balance AS bank_account_registry_currencies_account_balance 
+FROM bank_account_registry_currencies 
+WHERE bank_account_registry_currencies.user_id = ? AND bank_account_registry_currencies.currency_type = ?
+ LIMIT ? OFFSET ?]
+[parameters: (13, 1, 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+SCUM.db téléchargé avec succès.
+Erreur lors de la récupération du solde: (sqlite3.OperationalError) no such column: bank_account_registry_currencies.user_id
+[SQL: SELECT bank_account_registry_currencies.id AS bank_account_registry_currencies_id, bank_account_registry_currencies.user_id AS bank_account_registry_currencies_user_id, bank_account_registry_currencies.currency_type AS bank_account_registry_currencies_currency_type, bank_account_registry_currencies.account_balance AS bank_account_registry_currencies_account_balance 
+FROM bank_account_registry_currencies 
+WHERE bank_account_registry_currencies.user_id = ? AND bank_account_registry_currencies.currency_type = ?
+ LIMIT ? OFFSET ?]
+[parameters: (13, 1, 1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Synchronisation de SCUM.db (cache expiré ou absent)...
+SCUM.db synchronisé.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Erreur on_submit: 'QuantityModal' object has no attribute 'bank_service'
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Synchronisation de SCUM.db (cache expiré ou absent)...
+SCUM.db synchronisé.
+Erreur on_submit: DeliveryService.create_delivery() takes 4 positional arguments but 5 were given
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Synchronisation de SCUM.db (cache expiré ou absent)...
+SCUM.db synchronisé.
+Erreur on_submit: 'builtin_function_or_method' object has no attribute 'choice'
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Synchronisation de SCUM.db (cache expiré ou absent)...
+SCUM.db synchronisé.
+Erreur on_submit: 404 Not Found (error code: 10062): Unknown interaction
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Synchronisation de SCUM.db (cache expiré ou absent)...
+SCUM.db synchronisé.
+Erreur on_submit: 'location'
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
+Message M.I.R.A envoyé dans le canal 1393821678072631346.
