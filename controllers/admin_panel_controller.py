@@ -16,7 +16,7 @@ def send_admin_panel_message():
         ),
         color=discord.Color.dark_blue()
     )
-    view = View()
+    view = View(timeout=None)
     view.add_item(BankBalanceButton())
     view.add_item(DeliveryButton())
     return embed, view

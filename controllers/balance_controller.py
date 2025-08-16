@@ -20,7 +20,7 @@ class BankBalanceButton(Button):
 
             messages = {
                 -1: "❌ Erreur de connexion à la base SCUM (FTP).",
-                -2: "❌ Votre SteamID n'est pas lié. Utilisez `/lien_steam`.",
+                -2: "❌ Votre SteamID n'est pas lié.",
                 -3: "❌ ID SCUM introuvable.",
                 -4: "❌ Une erreur inattendue est survenue."
             }

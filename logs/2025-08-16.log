@@ -1,0 +1,4 @@
+2025-08-16 21:08:47,636 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-16 21:08:47,639 - discord.client - INFO - logging in using static token
+2025-08-16 21:08:48,516 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 03e9449e0a653c3f7c2a6b616b3a0b36).
+2025-08-16 21:08:50,786 - utils.logger - INFO - Message M.I.R.A envoyé dans le canal 1393821678072631346.

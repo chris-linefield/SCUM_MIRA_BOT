@@ -47,3 +47,49 @@ ValueError: I/O operation on closed file.
 2025-08-15 13:52:56,221 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
 2025-08-15 13:53:20,292 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
 2025-08-15 13:53:20,301 - utils.logger - ERROR - Erreur focus fenêtre SCUM: 
+2025-08-15 14:12:24,966 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-15 14:12:24,967 - discord.client - INFO - logging in using static token
+2025-08-15 14:12:25,921 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 1508158f2cef88cc879021891ef13a35).
+2025-08-15 14:12:28,153 - utils.logger - INFO - Message M.I.R.A envoyé dans le canal 1393821678072631346.
+2025-08-15 14:16:05,462 - utils.logger - INFO - Utilisateur 596773232997171202 (Joseph) a complété son enregistrement.
+2025-08-15 14:42:39,277 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-15 14:42:39,278 - discord.client - INFO - logging in using static token
+2025-08-15 14:42:40,200 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: feb5aedf3fec6c6e227db86f80b30596).
+2025-08-15 14:42:42,550 - utils.logger - INFO - Message M.I.R.A envoyé dans le canal 1393821678072631346.
+2025-08-15 14:42:51,750 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 15:12:02,778 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-15 15:12:02,780 - discord.client - INFO - logging in using static token
+2025-08-15 15:12:03,733 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 4424c8e44faa576a33970f35a3469de1).
+2025-08-15 15:12:05,951 - utils.logger - INFO - Message M.I.R.A envoyé dans le canal 1393821678072631346.
+2025-08-15 15:16:06,338 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-15 15:16:06,339 - discord.client - INFO - logging in using static token
+2025-08-15 15:16:07,131 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: a2592e3c1f01aac99c5e21fa429f8d99).
+2025-08-15 15:16:09,370 - utils.logger - INFO - Message M.I.R.A envoyé dans le canal 1393821678072631346.
+2025-08-15 15:16:14,614 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 15:17:23,486 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 15:19:33,164 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 22:59:50,203 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-15 22:59:50,204 - discord.client - INFO - logging in using static token
+2025-08-15 22:59:51,077 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7ba282a03ac3e7c57a036ced5fac27d4).
+2025-08-15 22:59:53,364 - utils.logger - INFO - Message M.I.R.A envoyé dans le canal 1393821678072631346.
+2025-08-15 23:00:03,911 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 23:02:10,216 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7ba282a03ac3e7c57a036ced5fac27d4.
+2025-08-15 23:02:14,960 - discord.client - INFO - logging in using static token
+2025-08-15 23:02:49,614 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 23:06:52,447 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 23:12:30,021 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7ba282a03ac3e7c57a036ced5fac27d4.
+2025-08-15 23:12:34,754 - discord.client - INFO - logging in using static token
+2025-08-15 23:15:33,816 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 23:20:08,098 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7ba282a03ac3e7c57a036ced5fac27d4.
+2025-08-15 23:20:12,838 - discord.client - INFO - logging in using static token
+2025-08-15 23:24:58,086 - utils.logger - INFO - Base SCUM téléchargée vers ./data/scum_bot.db
+2025-08-15 23:29:42,149 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7ba282a03ac3e7c57a036ced5fac27d4.
+2025-08-15 23:29:46,888 - discord.client - INFO - logging in using static token
+2025-08-15 23:31:58,963 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 7ba282a03ac3e7c57a036ced5fac27d4.
+2025-08-15 23:32:03,707 - discord.client - INFO - logging in using static token
+2025-08-15 23:40:19,418 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001FF4352DE50>
+2025-08-15 23:42:29,923 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-08-15 23:42:29,925 - discord.client - INFO - logging in using static token
+2025-08-15 23:42:32,207 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 466f68f0ff6823c73fec9f77e2c7f0f2).
+2025-08-15 23:42:34,444 - utils.logger - INFO - Message M.I.R.A envoyé dans le canal 1393821678072631346.
