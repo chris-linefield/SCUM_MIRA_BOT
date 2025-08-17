@@ -1,11 +1,9 @@
-# controllers/garage_controller.py
 from datetime import datetime, timedelta
 import discord
 import random
 import asyncio
 from discord.ui import Button, Select, View, Modal, TextInput
 from discord import Interaction, Embed
-from config.constants import DELIVERY_POSITIONS
 from repositories.scum_repository import logger
 from services.bank_service import BankService
 from services.scum_service import send_scum_command
@@ -13,6 +11,7 @@ from services.delivery_service import DeliveryService
 from config.settings import settings
 from repositories.user_repository import UserRepository
 from utils.action_logger import ActionLogger
+from config.constants import DELIVERY_POSITIONS, ITEM_PRICES
 
 class CancelButton(Button):
     def __init__(self, delivery_id: int, user_id: int, bank_service: BankService, user_repo: UserRepository):
@@ -165,6 +164,9 @@ class QuantityModal(Modal):
                 await interaction.followup.send("❌ La quantité doit être entre 1 et 20.", ephemeral=True)
                 return
 
+            item_price = ITEM_PRICES.get(self.item, 0)
+            total_cost = quantity * item_price
+
             # Message immédiat + traitement en arrière-plan
             await interaction.followup.send(
                 "✅ Commande reçue! Préparation en cours (vérifiez vos MP pour le suivi).",
@@ -172,14 +174,14 @@ class QuantityModal(Modal):
             )
 
             # Lance le traitement en tâche séparée
-            asyncio.create_task(self._process_delivery(interaction, quantity))
+            asyncio.create_task(self._process_delivery(interaction, quantity, total_cost))
 
         except ValueError:
             await interaction.followup.send("❌ Veuillez entrer un nombre valide.", ephemeral=True)
         except Exception as e:
             await interaction.followup.send(f"❌ Erreur initiale: {str(e)}", ephemeral=True)
 
-    async def _process_delivery(self, interaction: Interaction, quantity: int):
+    async def _process_delivery(self, interaction: Interaction, quantity: int, total_cost: int):
         """Méthode de traitement en arrière-plan avec gestion des erreurs"""
         try:
             # Message de progression initial
@@ -188,11 +190,8 @@ class QuantityModal(Modal):
             # Vérification de l'utilisateur
             user = self.user_repo.get_user(self.user_id)
             if not user or 'steam_id' not in user:
-                await progress_msg.edit(content="❌ SteamID non lié. Utilisez `/lien_steam`.")
+                await progress_msg.edit(content="❌ SteamID non lié.")
                 return
-
-            # Calcul du coût
-            total_cost = quantity * 1000
 
             # Vérification du solde
             await progress_msg.edit(content="💰 Vérification du solde...")

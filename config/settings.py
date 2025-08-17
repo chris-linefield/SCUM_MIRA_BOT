@@ -1,12 +1,18 @@
 from pydantic_settings import BaseSettings
-from config.constants import AUTHORIZED_ROLE_ID
 
 class Settings(BaseSettings):
     # Discord
     discord_token: str
     discord_guild_id: int
     discord_channel_id: int
-    discord_role_garagiste: int = AUTHORIZED_ROLE_ID
+
+    # Rôles (définis dans constants.py)
+    discord_role_garagiste: int = 1405192378066796606
+    discord_role_armurier: int = 1405501043684545556
+    discord_role_moto: int = 1406507024082276435
+    discord_role_quincaillerie: int = 1405501176786583593
+    discord_role_restaurateur: int = 1405501264187625533
+    discord_role_superette: int = 1405501210110332988
 
     # Base de données
     local_db_path: str = "./data/bot.db"

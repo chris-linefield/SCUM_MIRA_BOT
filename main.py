@@ -1,9 +1,16 @@
 import discord
 from discord.ext import commands, tasks
 from config.settings import settings
+from config.constants import CHANNELS
 from controllers.admin_panel_controller import setup_admin_panel
-from controllers.garage_panel_controller import setup_garage_panel
+from controllers.balance_panel_controller import setup_balance_panel
 from controllers.registration_controller import setup_registration
+from controllers.garage_panel_controller import setup_garage_console
+from controllers.gunsmith_panel_controller import setup_armurerie_console
+from controllers.moto_panel_controller import setup_moto_console
+from controllers.quincaillerie_panel_controller import setup_quincaillerie_console
+from controllers.restaurateur_panel_controller import setup_restaurateur_console
+from controllers.superette_panel_controller import setup_superette_console
 import os
 import asyncio
 import sys
@@ -15,16 +22,63 @@ if not os.path.exists('logs'):
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 last_heartbeat = datetime.now()
 
+async def purge_channel(channel_id: int):
+    """Purge tous les messages du canal spécifié"""
+    try:
+        channel = bot.get_channel(channel_id)
+        if channel:
+            await channel.purge(limit=100)  # Purge jusqu'à 100 messages
+            print(f"🧹 Canal {channel_id} purgé avec succès")
+        else:
+            print(f"❌ Canal {channel_id} introuvable pour la purge")
+    except Exception as e:
+        print(f"⚠️ Erreur lors de la purge du canal {channel_id}: {e}")
+
 @bot.event
 async def on_ready():
     global last_heartbeat
     last_heartbeat = datetime.now()
     print(f"🟢 Bot connecté: {bot.user}")
-    print(f"📌 Canal principal: {settings.discord_channel_id}")
+    print(f"📌 Configuration des panels en cours...")
 
-    await setup_registration(bot, settings.discord_channel_id)
-    await setup_admin_panel(bot, settings.discord_channel_id)
-    await setup_garage_panel(bot, settings.discord_channel_id)
+    # Purge et setup des panels
+    print("🔧 Configuration du panel d'administration...")
+    await setup_admin_panel(bot, 1393821678072631346)  # Sans purge
+
+    print("🔧 Configuration du panel d'enregistrement...")
+    await purge_channel(1405516212854722691)
+    await setup_registration(bot, 1405516212854722691)
+
+    print("🔧 Configuration du panel Solde Bancaire...")
+    await purge_channel(1406525039779778590)
+    await setup_balance_panel(bot, 1406525039779778590)
+
+    print("🔧 Configuration du panel Garage...")
+    await purge_channel(CHANNELS["garage"])
+    await setup_garage_console(bot, CHANNELS["garage"])
+
+    print("🔧 Configuration du panel Armurerie...")
+    await purge_channel(CHANNELS["armurerie"])
+    await setup_armurerie_console(bot, CHANNELS["armurerie"])
+
+    print("🔧 Configuration du panel Moto...")
+    await purge_channel(CHANNELS["moto"])
+    await setup_moto_console(bot, CHANNELS["moto"])
+
+    print("🔧 Configuration du panel Quincaillerie...")
+    await purge_channel(CHANNELS["quincaillerie"])
+    await setup_quincaillerie_console(bot, CHANNELS["quincaillerie"])
+
+    print("🔧 Configuration du panel Restaurateur...")
+    await purge_channel(CHANNELS["restaurateur"])
+    await setup_restaurateur_console(bot, CHANNELS["restaurateur"])
+
+    print("🔧 Configuration du panel Superette...")
+    await purge_channel(CHANNELS["superette"])
+    await setup_superette_console(bot, CHANNELS["superette"])
+
+    print("✅ Tous les panels ont été configurés avec succès!")
+    print("🟢 Bot prêt à l'emploi")
 
     heartbeat.start()
     connection_check.start()
