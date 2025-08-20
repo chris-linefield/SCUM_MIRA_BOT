@@ -124,6 +124,20 @@ async def connection_check():
 async def before_tasks():
     await bot.wait_until_ready()
 
+@bot.tree.command(name="reboot_scum", description="Redémarre manuellement SCUM")
+@commands.has_any_role(*list(ROLES.values()))
+async def reboot_scum(interaction: discord.Interaction):
+    """Commande pour redémarrer SCUM manuellement"""
+    await interaction.response.defer(ephemeral=True)
+
+    success = await scum_manager.reboot_scum()
+
+    if success:
+        await interaction.followup.send("✅ SCUM est en cours de redémarrage avec connexion automatique au serveur...", ephemeral=True)
+    else:
+        await interaction.followup.send("❌ Échec du redémarrage de SCUM", ephemeral=True)
+
+
 @bot.event
 async def on_disconnect():
     """Gère les déconnexions"""
