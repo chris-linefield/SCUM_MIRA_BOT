@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 from config.settings import settings
-from config.constants import CHANNELS
+from config.constants import CHANNELS, ROLES
 from controllers.admin_panel_controller import setup_admin_panel
 from controllers.balance_panel_controller import setup_balance_panel
 from controllers.registration_controller import setup_registration
@@ -15,6 +15,8 @@ import os
 import asyncio
 import sys
 from datetime import datetime, timedelta
+
+from repositories.scum_repository import logger
 
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -36,7 +38,7 @@ async def purge_channel(channel_id: int):
 
 @bot.event
 async def on_ready():
-    global last_heartbeat
+    global last_heartbeat, scum_reboot_service
     last_heartbeat = datetime.now()
     print(f"🟢 Bot connecté: {bot.user}")
     print(f"📌 Configuration des panels en cours...")
@@ -80,6 +82,9 @@ async def on_ready():
     print("✅ Tous les panels ont été configurés avec succès!")
     print("🟢 Bot prêt à l'emploi")
 
+    asyncio.create_task(scum_reboot_service.start_periodic_reboot())
+    logger.info("⏰ Service de reboot SCUM démarré (5h, 9h, 16h, 21h, 1h)")
+
     heartbeat.start()
     connection_check.start()
 
@@ -119,6 +124,22 @@ async def connection_check():
 @connection_check.before_loop
 async def before_tasks():
     await bot.wait_until_ready()
+
+@bot.tree.command(name="reboot_scum", description="Redémarre manuellement SCUM")
+@commands.has_any_role(*list(ROLES.values()))
+async def reboot_scum(interaction: discord.Interaction):
+    """Commande pour redémarrer SCUM manuellement"""
+    await interaction.response.defer(ephemeral=True)
+
+    from services.scum_reboot_service import SCUMRebootService
+    scum_reboot = SCUMRebootService()
+
+    success = await scum_reboot.execute_reboot()
+
+    if success:
+        await interaction.followup.send("✅ SCUM est en cours de redémarrage...", ephemeral=True)
+    else:
+        await interaction.followup.send("❌ Échec du redémarrage de SCUM", ephemeral=True)
 
 @bot.event
 async def on_error(event, *args, **kwargs):
