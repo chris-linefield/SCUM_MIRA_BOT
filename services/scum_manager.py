@@ -3,12 +3,10 @@ import asyncio
 import os
 import psutil
 from datetime import datetime, time as datetime_time, timedelta
-
-import pyautogui
 import pydirectinput
 from utils.logger import logger
 
-pyautogui.FAILSAFE = False
+pydirectinput.FAILSAFE = False
 
 class SCUMManager:
     def __init__(self):
@@ -35,6 +33,24 @@ class SCUMManager:
         self.connect_button_pos = (960, 450)     # Bouton "Se connecter"
         # Chemin vers le fichier de configuration de SCUM
         self.scum_config_path = os.path.expanduser("~/Documents/My Games/SCUM/Config/WindowsNoEditor/Engine.ini")
+
+        # Vérifie que toutes les coordonnées sont valides
+        self._validate_coordinates()
+
+    def _validate_coordinates(self):
+        """Vérifie que toutes les coordonnées sont des tuples (x, y) valides."""
+        coordinates = [
+            ("button_continue_pos", self.button_continue_pos),
+            ("join_server_pos", self.join_server_pos),
+            ("ip_field_pos", self.ip_field_pos),
+            ("password_field_pos", self.password_field_pos),
+            ("connect_button_pos", self.connect_button_pos),
+        ]
+        for name, pos in coordinates:
+            if not isinstance(pos, tuple) or len(pos) != 2:
+                raise ValueError(f"Coordonnée invalide pour {name}: {pos}")
+            if not all(isinstance(i, int) for i in pos):
+                raise ValueError(f"Les valeurs de {name} doivent être des entiers: {pos}")
 
     def is_scum_running(self):
         """Vérifie si SCUM est en cours d'exécution"""
@@ -102,32 +118,36 @@ class SCUMManager:
             logger.info("SCUM lancé. Attente de 45 secondes pour le chargement...")
             await asyncio.sleep(45)  # Temps pour que le jeu charge
 
+            # Centre la souris avant de commencer
+            pydirectinput.moveTo(960, 540)  # Centre de l'écran (ajuste si nécessaire)
+            await asyncio.sleep(1)
+
             # Automatiser les clics pour se connecter
-            logger.info("Début de la connexion automatique...")
-            pydirectinput.click(self.button_continue_pos)
+            logger.info(f"Clique sur CONTINUER à {self.button_continue_pos}")
+            pydirectinput.click(*self.button_continue_pos)
             await asyncio.sleep(3)
-            logger.info("Cliqué sur CONTINUER")
 
-            pydirectinput.click(self.join_server_pos)
+            logger.info(f"Clique sur Rejoindre un serveur à {self.join_server_pos}")
+            pydirectinput.click(*self.join_server_pos)
             await asyncio.sleep(3)
-            logger.info("Cliqué sur Rejoindre un serveur")
 
-            pydirectinput.click(self.ip_field_pos)
+            logger.info(f"Clique sur le champ IP à {self.ip_field_pos}")
+            pydirectinput.click(*self.ip_field_pos)
             pydirectinput.write(self.server_ip)
             await asyncio.sleep(1)
-            logger.info(f"IP entrée: {self.server_ip}")
 
-            pydirectinput.click(self.password_field_pos)
+            logger.info(f"Clique sur le champ mot de passe à {self.password_field_pos}")
+            pydirectinput.click(*self.password_field_pos)
             pydirectinput.write(self.server_password)
             await asyncio.sleep(1)
-            logger.info("Mot de passe entré")
 
-            pydirectinput.click(self.connect_button_pos)
+            logger.info(f"Clique sur Se connecter à {self.connect_button_pos}")
+            pydirectinput.click(*self.connect_button_pos)
             logger.info("Connexion au serveur initiée")
 
             return True
         except Exception as e:
-            logger.error(f"Erreur lors de l'automatisation: {e}")
+            logger.error(f"Erreur lors de l'automatisation: {e}", exc_info=True)
             return False
 
     async def reboot_scum(self):
@@ -162,7 +182,7 @@ class SCUMManager:
             self.last_reboot = datetime.now()
             return True
         except Exception as e:
-            logger.error(f"Erreur lors du redémarrage: {str(e)}")
+            logger.error(f"Erreur lors du redémarrage: {str(e)}", exc_info=True)
             return False
 
     def get_next_reboot_time(self):
@@ -189,5 +209,5 @@ class SCUMManager:
                 else:
                     await asyncio.sleep(time_until_reboot)
             except Exception as e:
-                logger.error(f"Erreur dans la boucle de reboot: {str(e)}")
+                logger.error(f"Erreur dans la boucle de reboot: {str(e)}", exc_info=True)
                 await asyncio.sleep(60)
