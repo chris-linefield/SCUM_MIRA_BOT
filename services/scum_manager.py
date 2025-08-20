@@ -2,68 +2,70 @@ import subprocess
 import asyncio
 import psutil
 import pydirectinput
-from datetime import datetime
-from utils.logger import logger  # Assure-toi que ton module `logger` est configuré
+from datetime import datetime, time as datetime_time, timedelta
+from repositories.scum_repository import logger
 
-# Désactive le fail-safe de pydirectinput (optionnel, pour éviter les interruptions)
-pydirectinput.FAILSAFE = False
+pydirectinput.FAILSAFE = False  # Désactive le fail-safe pour les tests
 
 class SCUMManager:
     def __init__(self):
         self.steam_path = r"C:\Program Files (x86)\Steam\steam.exe"
         self.scum_app_id = "513710"
-        # Coordonnée du bouton "CONTINUER" (adaptée à ton setup multi-écrans)
-        self.button_continue_pos = (-1676, 607)
-        self.log_file = "scum_reboot.log"
+        self.button_continue_pos = (186, 675)  # Coordonnées pour ton écran secondaire
+        self.reboot_times = [
+            datetime_time(5, 0),   # 5h
+            datetime_time(9, 0),   # 9h
+            datetime_time(16, 0),  # 16h
+            datetime_time(21, 0),  # 21h
+            datetime_time(1, 0)    # 1h
+        ]
+        self.log_file = "logs/scum_reboot.log"
 
     def is_scum_running(self):
-        """Vérifie si SCUM est en cours d'exécution"""
+        """Vérifie si SCUM est en cours d'exécution (synchrone)."""
         try:
             return "SCUM.exe" in [p.name() for p in psutil.process_iter()]
         except Exception as e:
             logger.error(f"Erreur vérification SCUM: {e}")
             return False
 
-    def kill_scum(self):
-        """Ferme SCUM"""
+    async def _kill_scum(self):
+        """Ferme SCUM de manière asynchrone."""
         try:
             for proc in psutil.process_iter(['name']):
                 if proc.info['name'] == "SCUM.exe":
                     proc.kill()
             logger.info("SCUM fermé avec succès.")
+            await asyncio.sleep(2)  # Temps pour la fermeture
             return True
         except Exception as e:
             logger.error(f"Erreur lors de la fermeture: {e}")
             return False
 
     async def launch_scum(self):
-        """Lance SCUM et clique sur 'CONTINUER'"""
+        """Lance SCUM et clique sur CONTINUER."""
         try:
-            # Lance SCUM via Steam
             subprocess.Popen([self.steam_path, "-applaunch", self.scum_app_id])
-            logger.info("SCUM lancé. Attente de 45 secondes pour le chargement...")
-            await asyncio.sleep(45)  # Temps pour que le jeu charge
+            logger.info("SCUM lancé. Attente de 45 secondes...")
+            await asyncio.sleep(45)  # Temps pour le chargement
 
-            # Clique sur "CONTINUER"
             pydirectinput.moveTo(*self.button_continue_pos)
             pydirectinput.click()
             logger.info(f"Cliqué sur CONTINUER à {self.button_continue_pos}")
             return True
         except Exception as e:
-            logger.error(f"Erreur lors du lancement: {e}")
+            logger.error(f"Erreur dans launch_scum: {e}", exc_info=True)
             return False
 
     async def reboot_scum(self):
-        """Redémarre SCUM et clique sur 'CONTINUER'"""
+        """Redémarre SCUM complètement."""
         try:
             logger.info("🔄 Redémarrage de SCUM...")
             if self.is_scum_running():
-                logger.info("Fermeture de SCUM...")
-                if not self.kill_scum():
+                if not await self._kill_scum():
                     return False
-                await asyncio.sleep(5)  # Attend la fermeture
+                await asyncio.sleep(3)  # Attend après la fermeture
 
-            logger.info("Relance de SCUM...")
             if not await self.launch_scum():
                 return False
 
@@ -73,16 +75,40 @@ class SCUMManager:
                 f.write(f"Bouton CONTINUER cliqué à {self.button_continue_pos}\n")
                 f.write("========================================\n")
 
-            logger.info("SCUM relancé avec succès !")
+            logger.info("SCUM relancé avec succès!")
             return True
         except Exception as e:
-            logger.error(f"Erreur: {e}")
+            logger.error(f"Erreur dans reboot_scum: {e}", exc_info=True)
             return False
 
-# Exemple d'utilisation (standalone)
-async def main():
-    manager = SCUMManager()
-    await manager.reboot_scum()
+    def get_next_reboot_time(self):
+        """Calcule le prochain horaire de reboot (synchrone)."""
+        now = datetime.now()
+        today = now.date()
+        for reboot_time in self.reboot_times:
+            next_reboot = datetime.combine(today, reboot_time)
+            if next_reboot > now:
+                return next_reboot
+        tomorrow = today + timedelta(days=1)
+        return datetime.combine(tomorrow, self.reboot_times[0])
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    async def start_periodic_reboot(self):
+        """Boucle infinie pour les reboots périodiques."""
+        while True:
+            try:
+                now = datetime.now()
+                next_reboot = self.get_next_reboot_time()
+                time_until_reboot = (next_reboot - now).total_seconds()
+
+                if time_until_reboot <= 0:
+                    await self.reboot_scum()
+                    await asyncio.sleep(60)  # Attend 1 minute avant de vérifier à nouveau
+                else:
+                    logger.info(f"Prochain reboot prévu à {next_reboot.strftime('%H:%M')}")
+                    await asyncio.sleep(time_until_reboot)
+            except asyncio.CancelledError:
+                logger.info("Tâche de reboot annulée")
+                break
+            except Exception as e:
+                logger.error(f"Erreur dans start_periodic_reboot: {e}", exc_info=True)
+                await asyncio.sleep(60)  # Attend 1 minute en cas d'erreur
