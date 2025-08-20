@@ -10,11 +10,13 @@ from controllers.moto_panel_controller import setup_moto_console
 from controllers.quincaillerie_panel_controller import setup_quincaillerie_console
 from controllers.restaurateur_panel_controller import setup_restaurateur_console
 from controllers.superette_panel_controller import setup_superette_console
-from services.scum_reboot_service import SCUMRebootService
 import os
 import asyncio
 import sys
 from datetime import datetime, timedelta
+
+from repositories.scum_repository import logger
+from services.scum_manager import SCUMManager
 
 # Configuration basique
 if not os.path.exists('logs'):
@@ -22,7 +24,7 @@ if not os.path.exists('logs'):
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 last_heartbeat = datetime.now()
-scum_reboot_service = SCUMRebootService()
+scum_manager = SCUMManager()
 
 async def purge_channel(channel_id: int):
     """Purge tous les messages du canal spécifié"""
@@ -79,8 +81,8 @@ async def on_ready():
     print("🟢 Bot prêt à l'emploi")
 
     # Démarrer le service de reboot périodique
-    asyncio.create_task(scum_reboot_service.start_periodic_reboot())
-    print("⏰ Service de reboot SCUM démarré (5h, 9h, 16h, 21h, 1h)")
+    asyncio.create_task(scum_manager.start_periodic_reboot())
+    logger.info("⏰ Service de reboot SCUM démarré (5h, 9h, 16h, 21h, 1h)")
 
     # Démarre les tâches de maintenance
     heartbeat.start()
