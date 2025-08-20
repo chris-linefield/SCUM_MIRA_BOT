@@ -3,8 +3,12 @@ import asyncio
 import os
 import psutil
 from datetime import datetime, time as datetime_time, timedelta
+
 import pyautogui
+import pydirectinput
 from utils.logger import logger
+
+pyautogui.FAILSAFE = False
 
 class SCUMManager:
     def __init__(self):
@@ -23,7 +27,7 @@ class SCUMManager:
         self.scum_app_id = "513710"
         self.server_ip = "176.57.173.98:28702"
         self.server_password = "MIRA072025"
-        # Coordonnées des éléments à cliquer (à adapter selon TA résolution)
+        # Coordonnées des éléments à cliquer (À ADAPTER SELON TA RÉSOLUTION !)
         self.button_continue_pos = (960, 200)    # Bouton "CONTINUER"
         self.join_server_pos = (960, 300)        # Bouton "Rejoindre un serveur"
         self.ip_field_pos = (960, 350)           # Champ IP
@@ -87,7 +91,7 @@ class SCUMManager:
             return False
 
     async def launch_scum(self):
-        """Lance SCUM via Steam et automatise la connexion avec pyautogui"""
+        """Lance SCUM via Steam et automatise la connexion avec pydirectinput"""
         try:
             if not self.update_config_file():
                 logger.error("Échec de la mise à jour de la configuration")
@@ -96,29 +100,29 @@ class SCUMManager:
             # Lancer SCUM via Steam
             subprocess.Popen([self.steam_path, "-applaunch", self.scum_app_id])
             logger.info("SCUM lancé. Attente de 45 secondes pour le chargement...")
-            await asyncio.sleep(45)  # Utilisation de asyncio.sleep
+            await asyncio.sleep(45)  # Temps pour que le jeu charge
 
             # Automatiser les clics pour se connecter
             logger.info("Début de la connexion automatique...")
-            pyautogui.click(self.button_continue_pos)
+            pydirectinput.click(self.button_continue_pos)
             await asyncio.sleep(3)
             logger.info("Cliqué sur CONTINUER")
 
-            pyautogui.click(self.join_server_pos)
+            pydirectinput.click(self.join_server_pos)
             await asyncio.sleep(3)
             logger.info("Cliqué sur Rejoindre un serveur")
 
-            pyautogui.click(self.ip_field_pos)
-            pyautogui.write(self.server_ip)
+            pydirectinput.click(self.ip_field_pos)
+            pydirectinput.write(self.server_ip)
             await asyncio.sleep(1)
             logger.info(f"IP entrée: {self.server_ip}")
 
-            pyautogui.click(self.password_field_pos)
-            pyautogui.write(self.server_password)
+            pydirectinput.click(self.password_field_pos)
+            pydirectinput.write(self.server_password)
             await asyncio.sleep(1)
             logger.info("Mot de passe entré")
 
-            pyautogui.click(self.connect_button_pos)
+            pydirectinput.click(self.connect_button_pos)
             logger.info("Connexion au serveur initiée")
 
             return True
@@ -142,10 +146,11 @@ class SCUMManager:
                 return False
 
             logger.info("Relance de SCUM...")
-            if not await self.launch_scum():  # Appel asynchrone
+            if not await self.launch_scum():
                 logger.error("Échec du lancement de SCUM")
                 return False
 
+            # Log du reboot
             with open(self.log_file, "a", encoding="utf-8") as f:
                 f.write(f"\n=== Reboot SCUM - {datetime.now()} ===\n")
                 f.write(f"Serveur: {self.server_ip}\n")
