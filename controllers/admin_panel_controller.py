@@ -2,10 +2,9 @@
 import discord
 from discord.ui import Button, View
 from discord import Interaction
-
-from config.constants import ROLES
 from services.scum_manager import SCUMManager
 from utils.action_logger import ActionLogger
+from config.constants import ROLES
 
 class AdminRebootButton(Button):
     def __init__(self):
@@ -56,3 +55,29 @@ class AdminRebootButton(Button):
                 "error",
                 str(e)
             )
+
+def send_admin_panel_message():
+    """Crée le message et la vue pour le panel d'administration"""
+    embed = discord.Embed(
+        title="🛠️ **Panel Administration - M.I.R.A**",
+        description=(
+            "*Un terminal s'allume devant vous, affichant les options disponibles.*\n\n"
+            "**🔹 Actions disponibles :**\n"
+            "- Redémarrer SCUM\n"
+        ),
+        color=discord.Color.dark_blue()
+    )
+
+    view = View(timeout=None)
+    view.add_item(AdminRebootButton())
+
+    return embed, view
+
+async def setup_admin_panel(bot, channel_id: int):
+    """Envoie le panel d'administration dans le canal spécifié"""
+    channel = bot.get_channel(channel_id)
+    if channel:
+        embed, view = send_admin_panel_message()
+        await channel.send(embed=embed, view=view)
+    else:
+        print(f"❌ Canal {channel_id} introuvable.")
