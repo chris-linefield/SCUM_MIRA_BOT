@@ -7,32 +7,28 @@ from utils.logger import logger
 
 class SCUMRebootService:
     def __init__(self):
+        # Utilisation de chemins absolus
         self.reboot_batch_path = os.path.join(os.getcwd(), "reboot.bat")
-        self.log_file = "scum_reboot.log"
-        # Heures de reboot spécifiques
+        self.log_file = os.path.join(os.getcwd(), "scum_reboot.log")
         self.reboot_times = [
-            time(5, 0),   # 5h du matin
-            time(9, 0),   # 9h du matin
-            time(16, 0),  # 16h de l'après-midi
-            time(21, 0),  # 21h du soir
-            time(1, 0)    # 1h du matin
+            time(5, 0), time(9, 0), time(16, 0), time(21, 0), time(1, 0)
         ]
         self.last_reboot = None
 
     async def execute_reboot(self):
-        """Exécute le script reboot.bat"""
+        """Exécute le script reboot.bat avec gestion améliorée des chemins"""
         try:
             logger.info("🔄 Début de la procédure de redémarrage de SCUM...")
 
-            # Vérifier que les fichiers batch existent
             if not os.path.exists(self.reboot_batch_path):
-                logger.error(f"Fichier {self.reboot_batch_path} introuvable")
+                logger.error(f"Fichier introuvable: {self.reboot_batch_path}")
                 return False
 
-            # Exécuter le script batch
+            # Exécution avec shell=True et chemin complet
             result = subprocess.run(
-                [self.reboot_batch_path],
+                f'"{self.reboot_batch_path}"',
                 shell=True,
+                cwd=os.getcwd(),  # Répertoire de travail
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
@@ -50,7 +46,7 @@ class SCUMRebootService:
             return True
 
         except Exception as e:
-            logger.error(f"Erreur lors du redémarrage de SCUM: {str(e)}")
+            logger.error(f"Erreur lors du redémarrage: {str(e)}")
             return False
 
     def get_next_reboot_time(self):

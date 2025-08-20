@@ -1,5 +1,5 @@
 @echo off
-:: Script pour redémarrer SCUM et se reconnecter au serveur
+:: Script pour redémarrer SCUM
 
 :: 1. Tuer le processus SCUM.exe
 echo [SCUM] Fermeture du client SCUM en cours...
@@ -10,8 +10,9 @@ timeout /t 5 /nobreak >nul
 taskkill /f /im SCUM.exe >nul 2>&1
 timeout /t 5 /nobreak >nul
 
-:: 3. Lancer le script de démarrage
+:: 3. Lancer start.bat avec chemin complet
 echo [SCUM] Redémarrage du client SCUM...
-start "" "start.bat"
+cd /d "%~dp0"
+call "start.bat"
 
 exit

@@ -2,7 +2,7 @@
 :: Script pour démarrer SCUM et se connecter au serveur MIRA
 
 :: Chemin vers SCUM (à adapter si nécessaire)
-set SCUM_PATH="C:\Program Files (x86)\Steam\steamapps\common\SCUM\Binaries\Win64\SCUM.exe"
+set SCUM_PATH="C:\Progra~1\Steam\steamapps\common\SCUM\Binaries\Win64\SCUM.exe"
 
 :: Paramètres de connexion
 set SERVER_IP=176.57.173.98:28702
