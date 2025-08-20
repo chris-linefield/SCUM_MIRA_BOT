@@ -6,3 +6,5 @@ if %errorlevel% neq 0 (
     timeout /t 5
 )
 goto loop
+
+"C:\Program Files (x86)\Steam\steamapps\common\SCUM\SCUM\Binaries\Win64\SCUM.exe" -log -NoSplashScreen -serveraddr=176.57.173.98 -serverport=28702 -password=MIRA072025
