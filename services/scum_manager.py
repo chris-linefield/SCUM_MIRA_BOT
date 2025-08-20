@@ -26,11 +26,7 @@ class SCUMManager:
         self.server_ip = "176.57.173.98:28702"
         self.server_password = "MIRA072025"
         # Coordonnées des éléments à cliquer (À ADAPTER SELON TA RÉSOLUTION !)
-        self.button_continue_pos = (960, 200)    # Bouton "CONTINUER"
-        self.join_server_pos = (960, 300)        # Bouton "Rejoindre un serveur"
-        self.ip_field_pos = (960, 350)           # Champ IP
-        self.password_field_pos = (960, 400)     # Champ mot de passe
-        self.connect_button_pos = (960, 450)     # Bouton "Se connecter"
+        self.button_continue_pos = (-1676, 607)    # Bouton "CONTINUER"
         # Chemin vers le fichier de configuration de SCUM
         self.scum_config_path = os.path.expanduser("~/Documents/My Games/SCUM/Config/WindowsNoEditor/Engine.ini")
 
