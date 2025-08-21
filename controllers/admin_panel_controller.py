@@ -1,4 +1,3 @@
-# controllers/admin_panel_controller.py
 import discord
 from discord.ui import Button, View
 from discord import Interaction
