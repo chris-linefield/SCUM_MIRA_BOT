@@ -16,6 +16,7 @@ import sys
 from datetime import datetime, timedelta
 
 from repositories.scum_repository import logger
+from services.bot_status_service import BotStatusService
 from services.scum_manager import SCUMManager
 
 # Configuration basique
@@ -24,7 +25,7 @@ if not os.path.exists('logs'):
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
 last_heartbeat = datetime.now()
-scum_manager = SCUMManager()
+scum_manager = SCUMManager(bot)
 
 async def purge_channel(channel_id: int):
     """Purge tous les messages du canal spécifié"""
@@ -80,8 +81,7 @@ async def on_ready():
     print("✅ Tous les panels ont été configurés avec succès!")
     print("🟢 Bot prêt à l'emploi")
 
-    # Démarrer le service de reboot périodique
-    asyncio.create_task(scum_manager.start_periodic_reboot())
+    asyncio.create_task(scum_manager.start_periodic_check())
     logger.info("⏰ Service de reboot SCUM démarré (5h, 9h, 16h, 21h, 1h)")
 
     # Démarre les tâches de maintenance
@@ -130,12 +130,20 @@ async def reboot_scum(interaction: discord.Interaction):
     """Commande pour redémarrer SCUM manuellement"""
     await interaction.response.defer(ephemeral=True)
 
-    success = await scum_manager.reboot_scum()
+    # Envoyer une annonce avant le reboot manuel
+    try:
+        success = await scum_manager.send_reboot_announce()
+        if success:
+            await interaction.followup.send("⚠️ Annonce envoyée ! Redémarrage dans 10 secondes...", ephemeral=True)
+            await asyncio.sleep(10)  # Attendre 10 secondes après l'annonce
 
-    if success:
-        await interaction.followup.send("✅ SCUM est en cours de redémarrage avec connexion automatique au serveur...", ephemeral=True)
-    else:
-        await interaction.followup.send("❌ Échec du redémarrage de SCUM", ephemeral=True)
+        success = await scum_manager.reboot_scum()
+        if success:
+            await interaction.followup.send("✅ SCUM redémarré avec succès !", ephemeral=True)
+        else:
+            await interaction.followup.send("❌ Échec du redémarrage de SCUM", ephemeral=True)
+    except Exception as e:
+        await interaction.followup.send(f"⚠️ Erreur: {str(e)}", ephemeral=True)
 
 
 @bot.event
