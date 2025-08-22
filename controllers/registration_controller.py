@@ -14,24 +14,33 @@ class SteamLinkButton(discord.ui.Button):
             custom_id="complete_registration"
         )
 
-    async def callback(self, interaction: Interaction):
-        if not interaction.response.is_done():
-            await interaction.response.defer(ephemeral=True)
-        else:
-            await interaction.followup.send("⚠️ L'interaction a expiré. Veuillez cliquer à nouveau sur le bouton.",
-                                            ephemeral=True)
-            return
-
-        user_repo = UserRepository()
-
-        if user_repo.is_user_registered(interaction.user.id):
-            await interaction.response.send_message(
-                "⚠️ Vous êtes déjà enregistré dans le système M.I.R.A.",
+    async def callback(self, interaction: discord.Interaction):
+        if interaction.response.is_done():
+            await interaction.followup.send(
+                "⚠️ Une erreur est survenue. Veuillez réessayer.",
                 ephemeral=True
             )
             return
 
-        await interaction.response.send_modal(SteamRegistrationModal())
+        await interaction.response.defer(ephemeral=True)
+
+        try:
+            user_repo = UserRepository()
+            if user_repo.is_user_registered(interaction.user.id):
+                await interaction.followup.send(
+                    "⚠️ Vous êtes déjà enregistré dans le système M.I.R.A.",
+                    ephemeral=True
+                )
+                return
+
+            await interaction.followup.send_modal(SteamRegistrationModal())
+
+        except Exception as e:
+            await interaction.followup.send(
+                f"❌ Une erreur est survenue: {str(e)}",
+                ephemeral=True
+            )
+            logger.error(f"Erreur SteamLinkButton: {e}")
 
 class SteamRegistrationModal(Modal):
     def __init__(self):
