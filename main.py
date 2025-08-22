@@ -113,17 +113,6 @@ async def heartbeat():
         except Exception as login_error:
             print(f"❌ Échec de reconnexion après heartbeat: {login_error}")
 
-@bot.tree.error
-async def on_app_command_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
-    if isinstance(error, discord.errors.InteractionResponded):
-        return  # Ignore les erreurs déjà traitées
-    await interaction.response.send_message(
-        "⚠️ Une erreur est survenue. Veuillez réessayer ou contacter un administrateur.",
-        ephemeral=True
-    )
-    logger.error(f"Erreur d'interaction: {error}", exc_info=True)
-
-
 @tasks.loop(seconds=60)
 async def connection_check():
     """Vérifie que la connexion est toujours active"""
