@@ -13,7 +13,7 @@ async def setup_balance_panel(bot, channel_id: int):
             ),
             color=discord.Color.gold()
         )
-        view = View()
+        view = View(timeout=None)
         view.add_item(BankBalanceButton())
         await channel.send(embed=embed, view=view)
     else:

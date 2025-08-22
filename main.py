@@ -90,46 +90,6 @@ async def on_ready():
     asyncio.create_task(scum_manager.start_periodic_reboot())
     logger.info("⏰ Service de reboot SCUM démarré (5h, 9h, 16h, 21h, 1h)")
 
-    # Démarre les tâches de maintenance
-    heartbeat.start()
-    connection_check.start()
-
-@tasks.loop(minutes=5)
-async def heartbeat():
-    """Maintient la connexion active"""
-    global last_heartbeat
-    last_heartbeat = datetime.now()
-    try:
-        channel = bot.get_channel(settings.discord_channel_id)
-        if channel:
-            message = await channel.send("🤖 Ping de maintien")
-            await asyncio.sleep(5)
-            await message.delete()
-    except Exception as e:
-        print(f"⚠️ Erreur heartbeat: {e}")
-        try:
-            await bot.close()
-            await bot.login(settings.discord_token)
-        except Exception as login_error:
-            print(f"❌ Échec de reconnexion après heartbeat: {login_error}")
-
-@tasks.loop(seconds=60)
-async def connection_check():
-    """Vérifie que la connexion est toujours active"""
-    global last_heartbeat
-    if (datetime.now() - last_heartbeat) > timedelta(minutes=1):
-        print("⚠️ Connexion perdue! Tentative de reconnexion...")
-        try:
-            await bot.close()
-            await bot.login(settings.discord_token)
-        except Exception as e:
-            print(f"❌ Échec de reconnexion: {e}")
-
-@heartbeat.before_loop
-@connection_check.before_loop
-async def before_tasks():
-    await bot.wait_until_ready()
-
 @bot.tree.command(name="reboot_scum", description="Redémarre manuellement SCUM")
 @commands.has_any_role(*list(ROLES.values()))
 async def reboot_scum(interaction: discord.Interaction):
