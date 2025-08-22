@@ -15,6 +15,13 @@ class SteamLinkButton(discord.ui.Button):
         )
 
     async def callback(self, interaction: Interaction):
+        if not interaction.response.is_done():
+            await interaction.response.defer(ephemeral=True)
+        else:
+            await interaction.followup.send("⚠️ L'interaction a expiré. Veuillez cliquer à nouveau sur le bouton.",
+                                            ephemeral=True)
+            return
+
         user_repo = UserRepository()
 
         if user_repo.is_user_registered(interaction.user.id):
@@ -150,7 +157,7 @@ def send_registration_message():
         inline=False
     )
     embed.set_footer(text="⚠️ Conformité immédiate requise.")
-    view = View()
+    view = View(timeout=None)
     view.add_item(SteamLinkButton())
     return embed, view
 
