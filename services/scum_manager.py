@@ -47,8 +47,13 @@ class SCUMManager:
         try:
             subprocess.Popen([self.steam_path, "-applaunch", self.scum_app_id])
             logger.info("SCUM lancé. Attente de 45 secondes...")
-            await asyncio.sleep(45)  # Temps pour le chargement
+            await asyncio.sleep(45)
 
+            pydirectinput.keyDown('ctrl')
+            pydirectinput.press('d')
+            pydirectinput.keyUp('ctrl')
+            logger.info("Combinaison Ctrl+D envoyée.")
+            await asyncio.sleep(2)
             pydirectinput.moveTo(*self.button_continue_pos)
             pydirectinput.click()
             logger.info(f"Cliqué sur CONTINUER à {self.button_continue_pos}")
