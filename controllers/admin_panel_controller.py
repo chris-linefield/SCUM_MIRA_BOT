@@ -1,6 +1,8 @@
 import discord
 from discord.ui import Button, View
 from discord import Interaction
+
+from controllers.storm_controller import StormAnnounceButton
 from services.scum_manager import SCUMManager
 from utils.action_logger import ActionLogger
 from config.constants import ROLES
@@ -63,12 +65,14 @@ def send_admin_panel_message():
             "*Un terminal s'allume devant vous, affichant les options disponibles.*\n\n"
             "**🔹 Actions disponibles :**\n"
             "- Redémarrer SCUM\n"
+            "- Annonce Tempête (Admin)"
         ),
         color=discord.Color.dark_blue()
     )
 
     view = View(timeout=None)
     view.add_item(AdminRebootButton())
+    view.add_item(StormAnnounceButton())
 
     return embed, view
 

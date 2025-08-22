@@ -9,6 +9,7 @@ from controllers.gunsmith_panel_controller import setup_armurerie_console
 from controllers.moto_panel_controller import setup_moto_console
 from controllers.quincaillerie_panel_controller import setup_quincaillerie_console
 from controllers.restaurateur_panel_controller import setup_restaurateur_console
+from controllers.storm_controller import setup_storm_panel, storm_status_loop, storm_announce_loop
 from controllers.superette_panel_controller import setup_superette_console
 import os
 import asyncio
@@ -79,6 +80,11 @@ async def on_ready():
 
     print("✅ Tous les panels ont été configurés avec succès!")
     print("🟢 Bot prêt à l'emploi")
+
+    print("🔧 Configuration du panel Tempêtes...")
+    await setup_storm_panel(bot)
+    storm_status_loop.start(bot)
+    storm_announce_loop.start(bot)
 
     # Démarrer le service de reboot périodique
     asyncio.create_task(scum_manager.start_periodic_reboot())
