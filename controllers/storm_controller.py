@@ -57,37 +57,36 @@ async def send_storm_announce(bot):
     return False
 
 async def update_storm_status_message(bot, channel_id):
-    """Met à jour le message de statut dans le canal spécifié."""
+    """Met à jour le message de statut dans le canal spécifié (sans bouton)."""
     channel = bot.get_channel(channel_id)
     if not channel:
         logger.error(f"Canal {channel_id} introuvable.")
-        return
+        return False
 
-    # Récupère le dernier message du bot dans le canal
-    async for message in channel.history(limit=1):
-        if message.author == bot.user:
+    # Recherche le dernier message du bot
+    async for message in channel.history(limit=5):
+        if message.author == bot.user and "🌪️ **Statut du Bot**" in message.embeds[0].title:
             embed = message.embeds[0]
             embed.description = (
                 f"**Bot en ligne** : {'✅ ON' if bot.is_ready() else '❌ OFF'}\n"
                 f"**Dernier ping** : {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
-                f"**Prochaine tempête** : {get_next_storm_time()}"
+                f"**Prochaine reinitialisation** : {get_next_storm_time()}"
             )
-            await message.edit(embed=embed)
-            return
+            await message.edit(embed=embed)  # Met à jour SANS bouton
+            return True
 
-    # Si aucun message existant, en envoie un nouveau
+    # Si aucun message existant, en envoie un nouveau (sans bouton)
     embed = discord.Embed(
-        title="🌪️ **Statut du Bot et Tempêtes**",
+        title="🌪️ **Statut du Bot**",
         description=(
             f"**Bot en ligne** : {'✅ ON' if bot.is_ready() else '❌ OFF'}\n"
             f"**Dernier ping** : {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
-            f"**Prochaine tempête** : {get_next_storm_time()}"
+            f"**Prochaine reinitialisation** : {get_next_storm_time()}"
         ),
         color=discord.Color.blue()
     )
-    view = View(timeout=None)
-    view.add_item(StormStatusButton())
-    await channel.send(embed=embed, view=view)
+    await channel.send(embed=embed)  # Envoie SANS View
+    return True
 
 def get_next_storm_time():
     """Calcule la prochaine tempête."""
