@@ -1,7 +1,9 @@
 import discord
+import pydirectinput
 from discord.ui import Button, Select, View, Modal, TextInput
 from discord import Interaction, Embed
 from config.constants import ITEM_PRICES, METIER_NAMES, MAX_QUANTITY, METIER_COLORS, ROLES, METIER_ITEMS
+from repositories.scum_repository import logger
 from services.bank_service import BankService
 from services.scum_service import send_scum_command
 from services.delivery_service import DeliveryService
@@ -54,7 +56,6 @@ class MetierQuantityModal(Modal):
         self.interaction = interaction
         self.user_id = user_id
         self.metier = metier
-
         self.quantity = TextInput(
             label=f"Quantité (1-{MAX_QUANTITY})",
             placeholder="Ex: 5",
@@ -64,33 +65,39 @@ class MetierQuantityModal(Modal):
         self.add_item(self.quantity)
 
     async def on_submit(self, interaction: Interaction):
+        # 1. Vérifie si l'interaction a déjà été répondue
+        if interaction.response.is_done():
+            await interaction.followup.send("⚠️ L'interaction a expiré. Veuillez réessayer.", ephemeral=True)
+            return
+
+        # 2. Répond immédiatement pour éviter le timeout
         await interaction.response.defer(ephemeral=True)
 
         try:
             quantity = int(self.quantity.value)
             if not 1 <= quantity <= MAX_QUANTITY:
-                await interaction.followup.send_message(
+                await interaction.followup.send(
                     f"❌ La quantité doit être entre 1 et {MAX_QUANTITY}.",
                     ephemeral=True
                 )
                 return
 
-            # Calcul du coût total
+            # 3. Calcul du coût total
             item_price = ITEM_PRICES.get(self.item, 0)
             total_cost = quantity * item_price
-
-            await interaction.followup.send_message(
+            await interaction.followup.send(
                 f"✅ Commande enregistrée! Coût total: {total_cost}€ (vérifiez vos MP).",
                 ephemeral=True
             )
 
-            # Lance le traitement en arrière-plan
+            # 4. Lance le traitement en arrière-plan
             asyncio.create_task(self.process_delivery(interaction, quantity, total_cost))
 
         except ValueError:
-            await interaction.followup.send_message("❌ Veuillez entrer un nombre valide.", ephemeral=True)
+            await interaction.followup.send("❌ Veuillez entrer un nombre valide.", ephemeral=True)
         except Exception as e:
-            await interaction.followup.send_message(f"❌ Erreur: {str(e)}", ephemeral=True)
+            await interaction.followup.send(f"❌ Erreur: {str(e)}", ephemeral=True)
+            logger.error(f"Erreur dans MetierQuantityModal: {str(e)}", exc_info=True)
 
     async def process_delivery(self, interaction: Interaction, quantity: int, total_cost: int):
         try:
@@ -100,7 +107,7 @@ class MetierQuantityModal(Modal):
             # Vérification de l'utilisateur
             user = self.user_repo.get_user(self.user_id)
             if not user or 'steam_id' not in user:
-                await progress_msg.edit(content="❌ SteamID non lié. Utilisez `/lien_steam`.")
+                await progress_msg.edit(content="❌ SteamID non lié.")
                 return
 
             # Vérification du solde
@@ -130,6 +137,9 @@ class MetierQuantityModal(Modal):
             if not success:
                 await progress_msg.edit(content=f"⚠️ {message}")
                 return
+
+            pydirectinput.press('enter')
+            await asyncio.sleep(0.5)
 
             # Création de la livraison
             await progress_msg.edit(content="📦 Création de la livraison...")
@@ -195,17 +205,19 @@ class MetierQuantityModal(Modal):
                     await progress_msg.edit(content="🚛 Livraison en cours...")
 
                     success, message = await send_scum_command(
-                        f"#TeleportTo {coords[0]} {coords[1]} {coords[2]}",
+                        f"#Teleport {coords[0]} {coords[1]} {coords[2]}",
                         self.user_id
                     )
                     if not success:
                         await interaction.user.send(f"⚠️ {message} (téléportation)")
                         return
 
+                    await asyncio.sleep(5)
+
                     for i in range(quantity):
                         await progress_msg.edit(content=f"📦 Spawn des items ({i+1}/{quantity})...")
                         success, message = await send_scum_command(
-                            f"#SpawnItem {self.item} 1",
+                            f"#SpawnItem {self.item} {quantity}",
                             self.user_id
                         )
                         if not success:
