@@ -13,11 +13,10 @@ class SCUMManager:
         self.scum_app_id = "513710"
         self.button_continue_pos = (186, 675)  # Coordonnées pour ton écran secondaire
         self.reboot_times = [
-            datetime_time(5, 0),   # 5h
-            datetime_time(9, 0),   # 9h
-            datetime_time(16, 0),  # 16h
-            datetime_time(21, 0),  # 21h
-            datetime_time(1, 0)    # 1h
+            datetime_time(1, 0),   # 01H
+            datetime_time(7, 0),   # 07H
+            datetime_time(13, 0),  # 13H
+            datetime_time(19, 0)   # 19H
         ]
         self.log_file = "logs/scum_reboot.log"
 
