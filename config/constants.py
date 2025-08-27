@@ -115,5 +115,5 @@ DELIVERY_TIME = 20 * 60
 ANNOUNCE_DELAY = 5 * 60
 
 STORM_TIMES = ["00:55", "06:55", "12:55", "18:55"]
-STORM_ANNOUNCE_MESSAGE = "Le vent se lève, la tempête semble très proche !"
+STORM_ANNOUNCE_MESSAGE = "Réinitialisation BCU dans 5 minutes."
 STATUS_CHANNEL_ID = 1407804333281640508

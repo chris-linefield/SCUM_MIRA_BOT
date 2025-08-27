@@ -110,12 +110,12 @@ class SteamRegistrationModal(Modal):
         )
         private_embed.add_field(
             name="🌐 Adresse IP de l'île",
-            value=f"192.168.{random.randint(10, 99)}.{random.randint(10, 99)}",
+            value=f"176.57.173.98:28702",
             inline=False
         )
         private_embed.add_field(
             name="🔑 Mot de passe d'accès",
-            value="bienessayé",
+            value="MIRA072025",
             inline=False
         )
         private_embed.add_field(
