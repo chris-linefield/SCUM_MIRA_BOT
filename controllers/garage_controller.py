@@ -436,11 +436,13 @@ class InstantVehicleConfirmModal(Modal):
             if balance < 0:
                 await interaction.followup.send("❌ Erreur de connexion à la base SCUM.", ephemeral=True)
                 return
-            if balance < vehicle_price:
-                await interaction.followup.send(f"❌ Solde insuffisant ({balance}€).", ephemeral=True)
+            # Correction : extraire la valeur du solde si c'est un tuple
+            balance_value = balance[0] if isinstance(balance, tuple) else balance
+            if balance_value < vehicle_price:
+                await interaction.followup.send(f"❌ Solde insuffisant ({balance_value}€).", ephemeral=True)
                 return
             # Retrait des fonds
-            new_balance = balance - vehicle_price
+            new_balance = balance_value - vehicle_price
             success, _ = await self.bank_service.withdraw(self.user_id, vehicle_price)
             if not success:
                 await interaction.followup.send("❌ Erreur lors du retrait.", ephemeral=True)
@@ -460,7 +462,8 @@ class InstantVehicleConfirmModal(Modal):
                 self.user_id
             )
             if not success:
-                await interaction.followup.send(f"❌ Échec de la téléportation: {message}. Contactez un administrateur.", ephemeral=True)
+                await interaction.followup.send(f"❌ Échec de la téléportation: {message}. Contactez un administrateur.",
+                                                ephemeral=True)
                 return
             await asyncio.sleep(2)  # Attendre la téléportation
             success, message = await send_scum_command(
@@ -468,7 +471,8 @@ class InstantVehicleConfirmModal(Modal):
                 self.user_id
             )
             if not success:
-                await interaction.followup.send(f"❌ Échec du spawn: {message}. Contactez un administrateur.", ephemeral=True)
+                await interaction.followup.send(f"❌ Échec du spawn: {message}. Contactez un administrateur.",
+                                                ephemeral=True)
                 return
             await interaction.followup.send(f"✅ Véhicule {self.vehicle} spawné avec succès !", ephemeral=True)
         except Exception as e:
