@@ -11,7 +11,8 @@ from services.delivery_service import DeliveryService
 from config.settings import settings
 from repositories.user_repository import UserRepository
 from utils.action_logger import ActionLogger
-from config.constants import DELIVERY_POSITIONS, ITEM_PRICES
+from config.constants import DELIVERY_POSITIONS, ITEM_PRICES, INSTANT_VEHICLE_POSITION
+
 
 class CancelButton(Button):
     def __init__(self, delivery_id: int, user_id: int, bank_service: BankService, user_repo: UserRepository):
@@ -374,5 +375,129 @@ class AdminDeliveryButton(Button):
                 ephemeral=True
             )
 
+        except Exception as e:
+            await interaction.followup.send(f"❌ Erreur: {str(e)}", ephemeral=True)
+
+class InstantVehicleSelectView(View):
+    def __init__(self, bank_service: BankService, user_repo: UserRepository, user_id: int):
+        super().__init__(timeout=180)
+        self.bank_service = bank_service
+        self.user_repo = user_repo
+        self.user_id = user_id
+        self.select = Select(
+            placeholder="Sélectionnez un véhicule",
+            options=[
+                discord.SelectOption(label="BP_Cruiser_B (20 000€)", value="BP_Cruiser_B"),
+                discord.SelectOption(label="BP_Dirtbike_A (30 000€)", value="BP_Dirtbike_A"),
+            ]
+        )
+        self.select.callback = self.select_callback
+        self.add_item(self.select)
+
+    async def select_callback(self, interaction: Interaction):
+        await interaction.response.send_modal(
+            InstantVehicleConfirmModal(
+                self.select.values[0],
+                self.bank_service,
+                self.user_repo,
+                interaction,
+                self.user_id
+            )
+        )
+
+class InstantVehicleConfirmModal(Modal):
+    def __init__(self, vehicle: str, bank_service: BankService, user_repo: UserRepository, interaction: Interaction, user_id: int):
+        super().__init__(title=f"Confirmation: {vehicle}")
+        self.vehicle = vehicle
+        self.bank_service = bank_service
+        self.user_repo = user_repo
+        self.interaction = interaction
+        self.user_id = user_id
+        self.confirm = TextInput(
+            label="Tapez 'OUI' pour confirmer l'achat",
+            placeholder="OUI",
+            required=True
+        )
+        self.add_item(self.confirm)
+
+    async def on_submit(self, interaction: Interaction):
+        await interaction.response.defer(ephemeral=True)
+        if self.confirm.value.upper() != "OUI":
+            await interaction.followup.send("❌ Annulé.", ephemeral=True)
+            return
+        try:
+            vehicle_price = ITEM_PRICES.get(self.vehicle, 0)
+            user = self.user_repo.get_user(self.user_id)
+            if not user or 'steam_id' not in user:
+                await interaction.followup.send("❌ SteamID non lié.", ephemeral=True)
+                return
+            # Vérification du solde
+            balance = await self.bank_service.get_user_balance(self.user_id)
+            if balance < 0:
+                await interaction.followup.send("❌ Erreur de connexion à la base SCUM.", ephemeral=True)
+                return
+            if balance < vehicle_price:
+                await interaction.followup.send(f"❌ Solde insuffisant ({balance}€).", ephemeral=True)
+                return
+            # Retrait des fonds
+            new_balance = balance - vehicle_price
+            success, _ = await self.bank_service.withdraw(self.user_id, vehicle_price)
+            if not success:
+                await interaction.followup.send("❌ Erreur lors du retrait.", ephemeral=True)
+                return
+            # Mise à jour du solde dans SCUM
+            success, message = await send_scum_command(
+                f"#SetCurrencyBalance Normal {new_balance} {user['steam_id']}",
+                self.user_id
+            )
+            if not success:
+                await interaction.followup.send(f"⚠️ {message}", ephemeral=True)
+                return
+            # Téléportation et spawn
+            await interaction.followup.send("🔄 Téléportation et spawn en cours...", ephemeral=True)
+            success, message = await send_scum_command(
+                f"#TeleportTo {INSTANT_VEHICLE_POSITION[0]} {INSTANT_VEHICLE_POSITION[1]} {INSTANT_VEHICLE_POSITION[2]}",
+                self.user_id
+            )
+            if not success:
+                await interaction.followup.send(f"❌ Échec de la téléportation: {message}. Contactez un administrateur.", ephemeral=True)
+                return
+            await asyncio.sleep(2)  # Attendre la téléportation
+            success, message = await send_scum_command(
+                f"#SpawnVehicle {self.vehicle}",
+                self.user_id
+            )
+            if not success:
+                await interaction.followup.send(f"❌ Échec du spawn: {message}. Contactez un administrateur.", ephemeral=True)
+                return
+            await interaction.followup.send(f"✅ Véhicule {self.vehicle} spawné avec succès !", ephemeral=True)
+        except Exception as e:
+            await interaction.followup.send(f"❌ Erreur: {str(e)}. Contactez un administrateur.", ephemeral=True)
+
+class InstantVehicleSpawnButton(Button):
+    def __init__(self):
+        super().__init__(
+            label="🚗 Spawn Véhicule Instantané",
+            style=discord.ButtonStyle.success,
+            custom_id="instant_vehicle_spawn"
+        )
+        self.bank_service = BankService()
+        self.user_repo = UserRepository()
+
+    async def callback(self, interaction: Interaction):
+        await interaction.response.defer(ephemeral=True)
+        try:
+            if not any(role.id == settings.discord_role_garagiste for role in interaction.user.roles):
+                await interaction.followup.send("❌ Rôle 'Garagiste' requis.", ephemeral=True)
+                return
+            user = self.user_repo.get_user(interaction.user.id)
+            if not user or 'steam_id' not in user or not user['steam_id']:
+                await interaction.followup.send("❌ Vous devez d'abord lier votre SteamID.", ephemeral=True)
+                return
+            await interaction.followup.send(
+                "🚗 Sélectionnez un véhicule:",
+                view=InstantVehicleSelectView(self.bank_service, self.user_repo, interaction.user.id),
+                ephemeral=True
+            )
         except Exception as e:
             await interaction.followup.send(f"❌ Erreur: {str(e)}", ephemeral=True)

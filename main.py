@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from config.settings import settings
 from config.constants import CHANNELS, METIER_NAMES, ROLES
 from controllers.admin_panel_controller import setup_admin_panel
+from controllers.balance_panel_controller import setup_balance_panel
 from controllers.registration_controller import setup_registration
 from controllers.garage_panel_controller import setup_garage_console
 from controllers.gunsmith_panel_controller import setup_armurerie_console
@@ -45,6 +46,10 @@ async def on_ready():
     last_heartbeat = datetime.now()
     print(f"🟢 Bot connecté: {bot.user}")
     print(f"📌 Configuration des panels en cours...")
+
+    print("🔧 Configuration du panel de solde bancaire...")
+    await purge_channel(1406525039779778590)
+    await setup_balance_panel(bot, 1406525039779778590)
 
     # Configuration des panels avec purge (sauf canal admin 1393821678072631346)
     print("🔧 Configuration du panel d'administration...")

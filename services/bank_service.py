@@ -1,4 +1,3 @@
-# services/bank_service.py
 from repositories.user_repository import UserRepository
 from repositories.scum_repository import ScumRepository
 from services.ftp_service import FTPService
@@ -12,45 +11,58 @@ class BankService:
         self.ftp_service = FTPService()
         self.logger = ActionLogger()
 
-    async def get_user_balance(self, discord_id: int) -> int:
-        """Récupère le solde bancaire d'un utilisateur"""
+    async def get_user_balance(self, discord_id: int) -> tuple[int, str]:
+        """Retourne (solde, message) ou (-1, message_erreur)"""
         try:
-            # Récupère l'utilisateur
             user = self.user_repo.get_user(discord_id)
             if not user or 'steam_id' not in user or not user['steam_id']:
-                return -2  # SteamID non lié
+                return -2, "SteamID non lié à votre compte Discord."
 
-            # Télécharge la base SCUM
             if not self.ftp_service.download_scum_db():
-                return -1  # Erreur FTP
+                return -1, "Échec de la synchronisation avec la base SCUM (FTP)."
 
-            # Récupère le solde
             scum_id = self.scum_repo.get_user_scum_id(user['steam_id'])
             if not scum_id:
-                return -3  # ID SCUM introuvable
+                return -3, f"ID SCUM introuvable pour le SteamID : {user['steam_id']}"
 
             balance = self.scum_repo.get_bank_balance(scum_id)
-            return balance
+            if balance is None:
+                return -4, "Aucun solde trouvé pour ce compte."
+
+            return balance, "Succès"
         except Exception as e:
             self.logger.log_action(discord_id, "balance_check", "error", "failed", str(e))
-            return -4  # Erreur inattendue
+            return -4, f"Erreur inattendue : {str(e)}"
+
+    async def get_top_balances(self, limit: int = 5) -> tuple[list[tuple], str]:
+        """Retourne (liste des soldes, message) ou ([], message_erreur)"""
+        try:
+            if not self.ftp_service.download_scum_db():
+                return [], "Échec de la synchronisation avec la base SCUM (FTP)."
+
+            top_balances = self.scum_repo.get_top_balances(limit)
+            if not top_balances:
+                return [], "Aucun solde trouvé."
+
+            return top_balances, "Succès"
+        except Exception as e:
+            self.logger.log_action(0, "top_balance_check", "error", "failed", str(e))
+            return [], f"Erreur inattendue : {str(e)}"
 
     async def withdraw(self, discord_id: int, amount: int) -> tuple[bool, str]:
         """Retire un montant du solde bancaire"""
         try:
-            # Récupère l'utilisateur
             user = self.user_repo.get_user(discord_id)
             if not user or 'steam_id' not in user or not user['steam_id']:
                 return False, "SteamID non lié."
 
-            # Vérifie le solde
-            balance = await self.get_user_balance(discord_id)
+            balance, message = await self.get_user_balance(discord_id)
             if balance < 0:
-                return False, "Erreur de connexion à la base SCUM."
+                return False, message
+
             if balance < amount:
                 return False, f"Solde insuffisant (actuel: {balance})."
 
-            # Met à jour le solde
             scum_id = self.scum_repo.get_user_scum_id(user['steam_id'])
             if not scum_id:
                 return False, "ID SCUM introuvable."

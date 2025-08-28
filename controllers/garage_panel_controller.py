@@ -6,7 +6,8 @@ from controllers.metier_command_controller import MetierCommandButton
 from services.scum_service import send_scum_command
 from config.constants import ROLES, CHANNELS, ANNOUNCE_MESSAGES, METIER_NAMES, METIER_COLORS
 from utils.action_logger import ActionLogger
-from controllers.garage_controller import RavitaillementGarageButton
+from controllers.garage_controller import RavitaillementGarageButton, InstantVehicleSpawnButton
+
 
 class GarageOpenButton(Button):
     def __init__(self):
@@ -142,16 +143,16 @@ def send_garage_console_message():
             f"Gérez les annonces et commandes du {METIER_NAMES['garage']}.\n\n"
             f"**🔹 Actions disponibles :**\n"
             f"- Ouverture/Fermeture du {METIER_NAMES['garage']}\n"
-            f"- Commande de produits"
+            f"- Commande de produits\n"
+            f"- Spawn instantané de véhicules"
         ),
         color=METIER_COLORS["garage"]
     )
-
     view = View(timeout=None)
     view.add_item(GarageOpenButton())
     view.add_item(GarageCloseButton())
     view.add_item(MetierCommandButton("garage"))
-
+    view.add_item(InstantVehicleSpawnButton())
     return embed, view
 
 async def setup_garage_console(bot, channel_id: int):

@@ -4,10 +4,6 @@ from utils.logger import logger
 from datetime import datetime, timedelta
 import os
 
-import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 class ScumRepository:
     def __init__(self):
         self.db_path = settings.scum_bot_db_path
@@ -29,7 +25,6 @@ class ScumRepository:
         try:
             if not os.path.exists(self.db_path):
                 return None
-
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             cursor.execute('SELECT id FROM user_profile WHERE user_id = ?', (steam_id,))
@@ -44,8 +39,7 @@ class ScumRepository:
         """Récupère le solde bancaire d'un utilisateur"""
         try:
             if not os.path.exists(self.db_path):
-                return 0
-
+                return None
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             cursor.execute('''
@@ -54,17 +48,39 @@ class ScumRepository:
             ''', (scum_id,))
             result = cursor.fetchone()
             conn.close()
-            return result[0] if result else 0
+            return result[0] if result else None
         except Exception as e:
             logger.error(f"Erreur SQL (bank_account): {e}")
-            return 0
+            return None
+
+    def get_top_balances(self, limit: int = 5) -> list[tuple]:
+        """Retourne une liste de tuples (name, account_balance)"""
+        try:
+            if not os.path.exists(self.db_path):
+                return []
+
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT up.name, bar.account_balance
+                FROM bank_account_registry_currencies bar
+                JOIN user_profile up ON bar.bank_account_id = up.id
+                WHERE bar.currency_type = 1
+                ORDER BY bar.account_balance DESC
+                LIMIT ?
+            ''', (limit,))
+            results = cursor.fetchall()
+            conn.close()
+            return results
+        except Exception as e:
+            logger.error(f"Erreur SQL (top balances): {e}")
+            return []
 
     def update_bank_balance(self, scum_id: int, new_balance: int) -> bool:
         """Met à jour le solde bancaire d'un utilisateur"""
         try:
             if not os.path.exists(self.db_path):
                 return False
-
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             cursor.execute('''

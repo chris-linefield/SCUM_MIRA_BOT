@@ -7,6 +7,8 @@ DELIVERY_POSITIONS = {
     "Z4 - Piste proche bunker": (437363.6906, 560133.7958, 0)
 }
 
+INSTANT_VEHICLE_POSITION = (-40915.480, -121644.586, 35180.148)
+
 # Prix des items
 ITEM_PRICES = {
     # Garage auto/moto
@@ -26,6 +28,10 @@ ITEM_PRICES = {
     # Restaurateur
     "VegetableOil": 800,
     "Vinegar": 500,
+
+    #Vehicule
+    "BP_Cruiser_B": 20000,
+    "BP_Dirtbike_A": 30000,
 
     # Superette
     "Sewing_kit": 480
