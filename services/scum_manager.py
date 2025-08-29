@@ -8,6 +8,8 @@ import pyperclip
 import pygetwindow as gw
 from datetime import datetime, time as datetime_time, timedelta
 from typing import Tuple
+
+from services.game_client import GameClient
 from utils.logger import logger
 
 pydirectinput.FAILSAFE = False
@@ -110,19 +112,35 @@ class ScumManager:
         tomorrow = today + timedelta(days=1)
         return datetime.combine(tomorrow, self.reboot_times[0])
 
+    async def send_reboot_warning(self):
+        """Envoie une annonce 5 minutes avant le redémarrage."""
+        message = "#Announce Réinitialisation des puces BCU dans 5 minutes, allongez-vous !"
+        success, result_message = await GameClient.announce(message)
+        if success:
+            logger.info(f"Annonce de redémarrage envoyée: {message}")
+        else:
+            logger.error(f"Erreur lors de l'envoi de l'annonce de redémarrage: {result_message}")
+
     async def start_periodic_reboot(self):
-        """Boucle infinie pour les reboots périodiques."""
+        """Boucle infinie pour les reboots périodiques et les annonces."""
         while True:
             try:
                 now = datetime.now()
                 next_reboot = self.get_next_reboot_time()
                 time_until_reboot = (next_reboot - now).total_seconds()
+
+                # Si le redémarrage est dans 5 minutes, envoyer l'annonce
+                if 0 < time_until_reboot <= 300:  # 300 secondes = 5 minutes
+                    await self.send_reboot_warning()
+                    await asyncio.sleep(300)  # Attendre 5 minutes avant le redémarrage
+                    continue
+
                 if time_until_reboot <= 0:
                     await self.reboot_scum()
-                    await asyncio.sleep(60)
+                    await asyncio.sleep(60)  # Attendre 1 minute avant de vérifier à nouveau
                 else:
                     logger.info(f"Prochain reboot prévu à {next_reboot.strftime('%H:%M')}")
-                    await asyncio.sleep(time_until_reboot)
+                    await asyncio.sleep(60)  # Vérifier toutes les minutes
             except asyncio.CancelledError:
                 logger.info("Tâche de reboot annulée")
                 break

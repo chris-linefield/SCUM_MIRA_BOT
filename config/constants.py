@@ -35,8 +35,8 @@ REGISTRATION_CHANNEL_ID = 1405516212854722691
 # Prix des items
 ITEM_PRICES = {
     # Garage
-    "Car_Repair_Kit": 2000,
-    "Gasoline_Canister": 1500,
+    "Car_Repair_Kit": 1,
+    "Gasoline_Canister": 1,
     # Armurerie
     "Grinding_Stone_02": 3000,
     "Weapon_Cleaning_Kit": 5200,
@@ -49,16 +49,23 @@ ITEM_PRICES = {
     "VegetableOil": 800,
     "Vinegar": 500,
     # Véhicules
-    "BP_Cruiser_B": 20000,
-    "BP_Dirtbike_A": 30000,
+    "BPC_WolfsWagen": 1,
+    "BPC_Cruiser": 1,
+    "BPC_Dirtbike": 1,
     # Superette
     "Sewing_kit": 480,
 }
 
 # Items par métier
 METIER_ITEMS = {
-    "garage": ["Car_Repair_Kit", "Gasoline_Canister", "BP_Cruiser_B"],
-    "moto": ["Car_Repair_Kit", "Gasoline_Canister", "BP_Dirtbike_A"],
+    "garage": {
+        "materials": ["Car_Repair_Kit", "Gasoline_Canister"],
+        "vehicles": ["BPC_WolfsWagen"]
+    },
+    "moto": {
+        "materials": ["Car_Repair_Kit", "Gasoline_Canister"],
+        "vehicles": ["BPC_Cruiser", "BPC_Dirtbike"]
+    },
     "armurerie": ["Grinding_Stone_02", "Weapon_Cleaning_Kit"],
     "quincaillerie": ["Tool_Box_Small", "Tool_Box", "Screwdriver", "Lockpick_Item"],
     "restaurateur": ["VegetableOil", "Vinegar"],

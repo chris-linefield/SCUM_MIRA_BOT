@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 from config import settings
+from repositories.ftp_repository import copy_bank_accounts_to_local_db
 from services.discord_service import DiscordService
 from services.scum_manager import ScumManager
 from config.constants import CHANNELS
@@ -20,6 +21,9 @@ async def on_ready():
     for merchant_type in CHANNELS.keys():
         if merchant_type in ["garage", "armurerie", "moto", "quincaillerie", "restaurateur", "superette"]:
             await DiscordService.send_shop_panel(bot, merchant_type)
+
+    # Copier les données bancaires à chaque démarrage
+    copy_bank_accounts_to_local_db()
 
     # Envoie le panel administrateur
     admin_channel = bot.get_channel(CHANNELS["admin_panel"])
