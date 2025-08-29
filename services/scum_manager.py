@@ -1,14 +1,12 @@
 import os
 import subprocess
-
 import psutil
 import pyautogui
 import asyncio
-
 import pydirectinput
 import pyperclip
 import pygetwindow as gw
-from datetime import datetime, time as datetime_time, timedelta, time
+from datetime import datetime, time as datetime_time, timedelta
 from typing import Tuple
 from utils.logger import logger
 
@@ -55,25 +53,20 @@ class ScumManager:
             subprocess.Popen([self.steam_path, "-applaunch", self.scum_app_id])
             logger.info("SCUM lancé. Attente de 45 secondes...")
             await asyncio.sleep(45)
-
             # Trouve la fenêtre SCUM
             scum_window = None
             for window in gw.getWindowsWithTitle("SCUM"):
                 scum_window = window
                 break
-
             if scum_window:
                 scum_window.activate()
                 await asyncio.sleep(2)
-
                 # Envoie Ctrl+D
                 pydirectinput.keyDown('ctrl')
                 pydirectinput.press('d')
                 pydirectinput.keyUp('ctrl')
                 logger.info("Combinaison Ctrl+D envoyée.")
-
                 await asyncio.sleep(2)
-
                 # Clique sur le bouton Continuer
                 pydirectinput.moveTo(*self.button_continue_pos)
                 pydirectinput.click()
@@ -137,8 +130,8 @@ class ScumManager:
                 logger.error(f"Erreur dans start_periodic_reboot: {e}")
                 await asyncio.sleep(60)
 
-    @staticmethod
-    def focus_scum_window() -> bool:
+    def focus_scum_window(self) -> bool:
+        """Active la fenêtre SCUM."""
         try:
             scum_window = next(w for w in gw.getWindowsWithTitle("SCUM") if w)
             scum_window.activate()
@@ -147,35 +140,37 @@ class ScumManager:
             logger.error(f"Erreur focus fenêtre SCUM: {e}")
             return False
 
-    @staticmethod
-    def send_command(command: str) -> Tuple[bool, str]:
-        if not ScumManager.is_scum_running():
+    def send_command(self, command: str) -> Tuple[bool, str]:
+        """Envoie une commande à SCUM."""
+        if not self.is_scum_running():
             return False, "SCUM n'est pas ouvert"
-        if not ScumManager.focus_scum_window():
+        if not self.focus_scum_window():
             return False, "Impossible de focuser SCUM"
         try:
             pyautogui.press('t')
-            time.sleep(2.0)
+            pyautogui.sleep(2.0)
             pyperclip.copy(command)
             pyautogui.hotkey('ctrl', 'v')
-            time.sleep(2.0)
+            pyautogui.sleep(2.0)
             pyautogui.press('enter')
-            time.sleep(2.0)
+            pyautogui.sleep(2.0)
             pyautogui.press('enter')
-            time.sleep(2.0)
+            pyautogui.sleep(2.0)
             return True, "Commande envoyée"
         except Exception as e:
             logger.error(f"Erreur envoi commande: {str(e)}")
             return False, f"Erreur: {str(e)}"
 
 async def send_scum_command(command: str, max_retries: int = 3) -> Tuple[bool, str]:
+    """Envoie une commande à SCUM avec gestion des erreurs et des réessais."""
+    scum_manager = ScumManager()  # Instancie ScumManager
     for attempt in range(max_retries):
-        if not ScumManager.is_scum_running():
+        if not scum_manager.is_scum_running():
             if attempt == max_retries - 1:
                 return False, "SCUM n'est pas ouvert. Veuillez lancer le jeu."
             await asyncio.sleep(5)
             continue
-        success, message = ScumManager.send_command(command)
+        success, message = scum_manager.send_command(command)
         if success:
             return True, "Commande envoyée avec succès"
         else:
