@@ -1,9 +1,9 @@
+# admin_view.py
 import discord
 from discord.ext import commands
 from discord.ui import View, Button, Modal, TextInput
 from config.constants import ADMIN_ROLES
-from services.scum_manager import ScumManager
-from services.game_client import GameClient  # Utilisation de GameClient pour envoyer l'annonce
+from services.game_client import GameClient
 from utils.logger import logger
 
 class AdminView(View):
@@ -23,6 +23,7 @@ class RebootSCUMButton(Button):
             return
 
         await interaction.response.defer(ephemeral=True)
+        from services.scum_manager import ScumManager
         scum_manager = ScumManager()
         success = await scum_manager.reboot_scum()
         if success:
@@ -63,9 +64,9 @@ class AnnounceModal(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         message = self.message.value
-        success, _ = await GameClient.announce(message)
+        success, result_message = await GameClient.announce(message)
         if success:
             logger.info(f"Annonce envoyée par {interaction.user}: {message}")
             await interaction.followup.send(f"✅ Annonce envoyée: {message}", ephemeral=True)
         else:
-            await interaction.followup.send("❌ Erreur lors de l'envoi de l'annonce.", ephemeral=True)
+            await interaction.followup.send(f"❌ Erreur lors de l'envoi de l'annonce: {result_message}", ephemeral=True)
