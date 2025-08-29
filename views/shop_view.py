@@ -3,7 +3,6 @@ from discord.ui import View, Button, Select
 from services.scum_service import ScumService
 from services.game_client import GameClient
 from repositories.user_repository import UserRepository
-from repositories.scum_repository import get_user_balance
 from config.constants import ITEM_PRICES, MAX_QUANTITY, METIER_ITEMS, ANNOUNCE_MESSAGES
 from utils.logger import logger
 
@@ -37,7 +36,7 @@ class CloseShopButton(Button):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         message = ANNOUNCE_MESSAGES[self.merchant_type]["close"]
         if await GameClient.announce(message):
             await interaction.followup.send(f"Annonce de fermeture envoyée: {message}", ephemeral=True)
@@ -49,15 +48,16 @@ class CheckBalanceButton(Button):
         super().__init__(label="Consulter mon solde", style=discord.ButtonStyle.blurple, custom_id="check_balance")
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
             await interaction.followup.send("Vous devez d'abord vous enregistrer avec `!register`.", ephemeral=True)
             return
 
+        from repositories.scum_repository import get_user_balance
         balance = get_user_balance(user.steam_id)
-        await interaction.followup.send(f"Votre solde bancaire est de: {balance}", ephemeral=True)
+        await interaction.followup.send(f"Votre solde est de: {balance}", ephemeral=True)
 
 class BuyItemButton(Button):
     def __init__(self, merchant_type: str):
@@ -65,7 +65,7 @@ class BuyItemButton(Button):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
@@ -107,7 +107,7 @@ class BuyItemModal(discord.ui.Modal):
         self.add_item(self.count)
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         count = int(self.count.value)
         price = ITEM_PRICES[self.item_id] * count
         if await ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
@@ -121,7 +121,7 @@ class BuyVehicleButton(Button):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
@@ -146,7 +146,7 @@ class VehicleSelect(Select):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         vehicle_id = self.values[0]
         if await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, ITEM_PRICES[vehicle_id]):
             await interaction.followup.send(f"Achat du véhicule {vehicle_id} effectué !", ephemeral=True)
