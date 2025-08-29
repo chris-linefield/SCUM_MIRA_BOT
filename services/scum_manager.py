@@ -56,9 +56,9 @@ class ScumManager:
             logger.info("SCUM lancé. Attente de 45 secondes...")
             await asyncio.sleep(45)
 
-            # Assurez-vous que la fenêtre SCUM est active
+            # Trouve la fenêtre SCUM
             scum_window = None
-            for window in pydirectinput.getWindowsWithTitle("SCUM"):
+            for window in gw.getWindowsWithTitle("SCUM"):
                 scum_window = window
                 break
 
