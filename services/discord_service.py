@@ -5,7 +5,6 @@ from utils.logger import logger
 from views.registration_view import send_registration_message
 from views.shop_view import ShopView
 
-
 class DiscordService:
     @staticmethod
     async def purge_channel(channel: discord.TextChannel):

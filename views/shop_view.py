@@ -54,7 +54,7 @@ class CheckBalanceButton(Button):
         user = user_repo.get_user(interaction.user.id)
         if not user:
             await interaction.followup.send(
-                "⚠️ **Erreur** : Vous devez d'abord vous enregistrer.",
+                "⚠️ **Erreur** : Vous devez d'abord vous enregistrer avec la commande `!register`.",
                 ephemeral=True
             )
             return
@@ -128,10 +128,7 @@ class BuyItemModal(discord.ui.Modal):
         price = ITEM_PRICES[self.item_id] * count
         if await ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
             new_balance = get_bank_balance(self.user_steam_id)
-            await interaction.followup.send(
-                f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.",
-                ephemeral=True
-            )
+            await interaction.followup.send(f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
         else:
             await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
 
@@ -168,20 +165,8 @@ class VehicleSelect(Select):
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         vehicle_id = self.values[0]
-        price = ITEM_PRICES[vehicle_id]
-        if await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, price):
-            new_balance = get_bank_balance(self.user_steam_id)
-            await interaction.followup.send(
-                f"Achat du véhicule {vehicle_id} effectué !\nNouveau solde : **{new_balance}**.",
-                ephemeral=True
-            )
-        else:
-            await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
-
-    async def callback(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        vehicle_id = self.values[0]
         if await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, ITEM_PRICES[vehicle_id]):
-            await interaction.followup.send(f"Achat du véhicule {vehicle_id} effectué !", ephemeral=True)
+            new_balance = get_bank_balance(self.user_steam_id)
+            await interaction.followup.send(f"Achat du véhicule {vehicle_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
         else:
             await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)

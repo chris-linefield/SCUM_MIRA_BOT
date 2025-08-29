@@ -8,8 +8,6 @@ import pyperclip
 import pygetwindow as gw
 from datetime import datetime, time as datetime_time, timedelta
 from typing import Tuple
-
-from services.game_client import GameClient
 from utils.logger import logger
 
 pydirectinput.FAILSAFE = False
@@ -115,7 +113,7 @@ class ScumManager:
     async def send_reboot_warning(self):
         """Envoie une annonce 5 minutes avant le redémarrage."""
         message = "#Announce Réinitialisation des puces BCU dans 5 minutes, allongez-vous !"
-        success, result_message = await GameClient.announce(message)
+        success, result_message = await self.send_scum_command(message)
         if success:
             logger.info(f"Annonce de redémarrage envoyée: {message}")
         else:
@@ -128,13 +126,11 @@ class ScumManager:
                 now = datetime.now()
                 next_reboot = self.get_next_reboot_time()
                 time_until_reboot = (next_reboot - now).total_seconds()
-
                 # Si le redémarrage est dans 5 minutes, envoyer l'annonce
                 if 0 < time_until_reboot <= 300:  # 300 secondes = 5 minutes
                     await self.send_reboot_warning()
                     await asyncio.sleep(300)  # Attendre 5 minutes avant le redémarrage
                     continue
-
                 if time_until_reboot <= 0:
                     await self.reboot_scum()
                     await asyncio.sleep(60)  # Attendre 1 minute avant de vérifier à nouveau
