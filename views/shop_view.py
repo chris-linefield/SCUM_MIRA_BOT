@@ -23,11 +23,12 @@ class OpenShopButton(Button):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         message = ANNOUNCE_MESSAGES[self.merchant_type]["open"]
-        if GameClient.announce(message):
-            await interaction.response.send_message(f"Annonce d'ouverture envoyée: {message}", ephemeral=True)
+        if await GameClient.announce(message):
+            await interaction.followup.send(f"Annonce d'ouverture envoyée: {message}", ephemeral=True)
         else:
-            await interaction.response.send_message("Erreur lors de l'envoi de l'annonce.", ephemeral=True)
+            await interaction.followup.send("Erreur lors de l'envoi de l'annonce.", ephemeral=True)
 
 class CloseShopButton(Button):
     def __init__(self, merchant_type: str):
@@ -35,26 +36,28 @@ class CloseShopButton(Button):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         message = ANNOUNCE_MESSAGES[self.merchant_type]["close"]
-        if GameClient.announce(message):
-            await interaction.response.send_message(f"Annonce de fermeture envoyée: {message}", ephemeral=True)
+        if await GameClient.announce(message):
+            await interaction.followup.send(f"Annonce de fermeture envoyée: {message}", ephemeral=True)
         else:
-            await interaction.response.send_message("Erreur lors de l'envoi de l'annonce.", ephemeral=True)
+            await interaction.followup.send("Erreur lors de l'envoi de l'annonce.", ephemeral=True)
 
 class CheckBalanceButton(Button):
     def __init__(self):
         super().__init__(label="Consulter mon solde", style=discord.ButtonStyle.blurple, custom_id="check_balance")
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
-            await interaction.response.send_message("Vous devez d'abord vous enregistrer avec `!register`.", ephemeral=True)
+            await interaction.followup.send("Vous devez d'abord vous enregistrer avec `!register`.", ephemeral=True)
             return
 
         from repositories.scum_repository import get_user_balance
         balance = get_user_balance(user.steam_id)
-        await interaction.response.send_message(f"Votre solde est de: {balance}", ephemeral=True)
+        await interaction.followup.send(f"Votre solde est de: {balance}", ephemeral=True)
 
 class BuyItemButton(Button):
     def __init__(self, merchant_type: str):
@@ -62,22 +65,23 @@ class BuyItemButton(Button):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
-            await interaction.response.send_message("Vous devez d'abord vous enregistrer avec `!register`.", ephemeral=True)
+            await interaction.followup.send("Vous devez d'abord vous enregistrer avec `!register`.", ephemeral=True)
             return
 
         merchant_items = [item for item in METIER_ITEMS[self.merchant_type] if not item.startswith("BP_")]
         if not merchant_items:
-            await interaction.response.send_message("Aucun matériel disponible pour ce marchand.", ephemeral=True)
+            await interaction.followup.send("Aucun matériel disponible pour ce marchand.", ephemeral=True)
             return
 
         options = [discord.SelectOption(label=item, value=item) for item in merchant_items]
         select = Select(placeholder="Choisissez un item", options=options, custom_id=f"select_item_{self.merchant_type}")
         view = View()
         view.add_item(select)
-        await interaction.response.send_message("Sélectionnez un item:", view=view, ephemeral=True)
+        await interaction.followup.send("Sélectionnez un item:", view=view, ephemeral=True)
 
         async def select_callback(select_interaction: discord.Interaction):
             if select_interaction.user != interaction.user:
@@ -103,12 +107,13 @@ class BuyItemModal(discord.ui.Modal):
         self.add_item(self.count)
 
     async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         count = int(self.count.value)
         price = ITEM_PRICES[self.item_id] * count
-        if ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
-            await interaction.response.send_message(f"Achat de {count}x {self.item_id} effectué !", ephemeral=True)
+        if await ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
+            await interaction.followup.send(f"Achat de {count}x {self.item_id} effectué !", ephemeral=True)
         else:
-            await interaction.response.send_message("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
+            await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
 
 class BuyVehicleButton(Button):
     def __init__(self, merchant_type: str):
@@ -116,22 +121,23 @@ class BuyVehicleButton(Button):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
-            await interaction.response.send_message("Vous devez d'abord vous enregistrer avec `!register`.", ephemeral=True)
+            await interaction.followup.send("Vous devez d'abord vous enregistrer avec `!register`.", ephemeral=True)
             return
 
         merchant_vehicles = [item for item in METIER_ITEMS[self.merchant_type] if item.startswith("BP_")]
         if not merchant_vehicles:
-            await interaction.response.send_message("Aucun véhicule disponible pour ce marchand.", ephemeral=True)
+            await interaction.followup.send("Aucun véhicule disponible pour ce marchand.", ephemeral=True)
             return
 
         options = [discord.SelectOption(label=vehicle, value=vehicle) for vehicle in merchant_vehicles]
         select = VehicleSelect(user.steam_id, options, self.merchant_type)
         view = View()
         view.add_item(select)
-        await interaction.response.send_message("Sélectionnez un véhicule:", view=view, ephemeral=True)
+        await interaction.followup.send("Sélectionnez un véhicule:", view=view, ephemeral=True)
 
 class VehicleSelect(Select):
     def __init__(self, user_steam_id: str, options: list, merchant_type: str):
@@ -140,8 +146,9 @@ class VehicleSelect(Select):
         self.merchant_type = merchant_type
 
     async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
         vehicle_id = self.values[0]
-        if ScumService.buy_vehicle(self.user_steam_id, vehicle_id, ITEM_PRICES[vehicle_id]):
-            await interaction.response.send_message(f"Achat du véhicule {vehicle_id} effectué !", ephemeral=True)
+        if await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, ITEM_PRICES[vehicle_id]):
+            await interaction.followup.send(f"Achat du véhicule {vehicle_id} effectué !", ephemeral=True)
         else:
-            await interaction.response.send_message("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
+            await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)

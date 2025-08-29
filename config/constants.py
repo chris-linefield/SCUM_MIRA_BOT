@@ -10,6 +10,13 @@ ROLES = {
     "superette": 1405501210110332988,
 }
 
+# Rôles administrateurs
+ADMIN_ROLES = [
+    1391037447470710875,
+    1390041557092143114,
+    1404135876367355945,
+]
+
 # Canaux Discord
 CHANNELS = {
     "garage": 1405480822462742549,
@@ -18,6 +25,8 @@ CHANNELS = {
     "quincaillerie": 1405504539867742208,
     "restaurateur": 1405505475574759534,
     "superette": 1406507683137327224,
+    "admin_panel": 1393821678072631346,
+    "status": 1407804333281640508,
 }
 
 # Canal d'inscription
