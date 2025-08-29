@@ -49,6 +49,7 @@ class CheckBalanceButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)  # Répondre immédiatement
+
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
@@ -57,7 +58,11 @@ class CheckBalanceButton(Button):
 
         from repositories.scum_repository import get_user_balance
         balance = get_user_balance(user.steam_id)
-        await interaction.followup.send(f"Votre solde est de: {balance}", ephemeral=True)
+
+        if balance is None or balance == 0:
+            await interaction.followup.send("Compte non trouvé ou erreur lors de la récupération du solde.", ephemeral=True)
+        else:
+            await interaction.followup.send(f"Votre solde bancaire est de: {balance}", ephemeral=True)
 
 class BuyItemButton(Button):
     def __init__(self, merchant_type: str):
