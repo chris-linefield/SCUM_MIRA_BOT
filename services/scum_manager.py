@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 import psutil
@@ -25,6 +26,7 @@ class ScumManager:
             datetime_time(19, 0)   # 19H
         ]
         self.log_file = "logs/scum_reboot.log"
+        os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
 
     def is_scum_running(self):
         """Vérifie si SCUM est en cours d'exécution."""
@@ -53,15 +55,33 @@ class ScumManager:
             subprocess.Popen([self.steam_path, "-applaunch", self.scum_app_id])
             logger.info("SCUM lancé. Attente de 45 secondes...")
             await asyncio.sleep(45)
-            pydirectinput.keyDown('ctrl')
-            pydirectinput.press('d')
-            pydirectinput.keyUp('ctrl')
-            logger.info("Combinaison Ctrl+D envoyée.")
-            await asyncio.sleep(2)
-            pydirectinput.moveTo(*self.button_continue_pos)
-            pydirectinput.click()
-            logger.info(f"Cliqué sur CONTINUER à {self.button_continue_pos}")
-            return True
+
+            # Assurez-vous que la fenêtre SCUM est active
+            scum_window = None
+            for window in pydirectinput.getWindowsWithTitle("SCUM"):
+                scum_window = window
+                break
+
+            if scum_window:
+                scum_window.activate()
+                await asyncio.sleep(2)
+
+                # Envoie Ctrl+D
+                pydirectinput.keyDown('ctrl')
+                pydirectinput.press('d')
+                pydirectinput.keyUp('ctrl')
+                logger.info("Combinaison Ctrl+D envoyée.")
+
+                await asyncio.sleep(2)
+
+                # Clique sur le bouton Continuer
+                pydirectinput.moveTo(*self.button_continue_pos)
+                pydirectinput.click()
+                logger.info(f"Cliqué sur CONTINUER à {self.button_continue_pos}")
+                return True
+            else:
+                logger.error("Fenêtre SCUM introuvable.")
+                return False
         except Exception as e:
             logger.error(f"Erreur dans launch_scum: {e}")
             return False

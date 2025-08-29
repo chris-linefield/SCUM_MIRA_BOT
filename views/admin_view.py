@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.ui import View, Button, Modal, TextInput
 from config.constants import ADMIN_ROLES
 from services.scum_manager import ScumManager
+from services.game_client import GameClient  # Utilisation de GameClient pour envoyer l'annonce
 from utils.logger import logger
 
 class AdminView(View):
@@ -41,10 +42,6 @@ class RebootBotButton(Button):
         await interaction.response.defer(ephemeral=True)
         await interaction.followup.send("✅ Le bot va redémarrer dans quelques secondes.", ephemeral=True)
         logger.info(f"Redémarrage du bot demandé par {interaction.user}.")
-        # Pour redémarrer le bot, vous pouvez utiliser `os.execv` ou un système externe.
-        # Exemple basique (à adapter selon votre hébergement) :
-        # import os
-        # os.execv(__file__, ['python'] + sys.argv)
 
 class AnnounceButton(Button):
     def __init__(self):
@@ -65,6 +62,10 @@ class AnnounceModal(Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
-        # Logique pour envoyer l'annonce dans le jeu ou un canal Discord
-        logger.info(f"Annonce envoyée par {interaction.user}: {self.message.value}")
-        await interaction.followup.send(f"✅ Annonce envoyée: {self.message.value}", ephemeral=True)
+        message = self.message.value
+        success, _ = await GameClient.announce(message)
+        if success:
+            logger.info(f"Annonce envoyée par {interaction.user}: {message}")
+            await interaction.followup.send(f"✅ Annonce envoyée: {message}", ephemeral=True)
+        else:
+            await interaction.followup.send("❌ Erreur lors de l'envoi de l'annonce.", ephemeral=True)
