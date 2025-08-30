@@ -11,6 +11,7 @@ from services.delivery_service import check_pending_deliveries
 from services.discord_service import DiscordService
 from services.scum_manager import ScumManager
 from config.constants import CHANNELS, DELIVERY_POSITIONS
+from services.timer_manager import TimerManager
 from utils.logger import logger
 from datetime import datetime
 
@@ -44,6 +45,9 @@ async def on_ready():
     bot.loop.create_task(scum_manager.start_periodic_reboot())
     # Démarrer la tâche de gestion des livraisons
     bot.loop.create_task(check_pending_deliveries(bot))
+
+    timer_manager = TimerManager()
+    timer_manager.set_bot(bot)
 
 @tasks.loop(minutes=5)
 async def update_status_embed():

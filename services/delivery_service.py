@@ -7,17 +7,17 @@ from config.constants import DELIVERY_POSITIONS, DELIVERY_TIME
 from services.scum_manager import send_scum_command
 from utils.logger import logger
 
-async def schedule_delivery(user_discord_id: int, user_steam_id: str, item_id: str, quantity: int) -> bool:
+async def schedule_delivery(bot, user_discord_id: int, user_steam_id: str, item_id: str, count: int) -> bool:
     """Planifie une livraison."""
     try:
         delivery_position = random.choice(list(DELIVERY_POSITIONS.keys()))
         delivery_time = (datetime.now() + timedelta(minutes=DELIVERY_TIME)).strftime("%Y-%m-%d %H:%M:%S")
 
-        if not add_delivery(user_discord_id, user_steam_id, item_id, quantity, delivery_position, delivery_time):
+        if not add_delivery(user_discord_id, user_steam_id, item_id, count, delivery_position, delivery_time):
             logger.error(f"Erreur lors de l'ajout de la livraison pour {user_steam_id}.")
             return False
 
-        logger.info(f"Livraison planifiée pour {user_steam_id}: {item_id} x{quantity} à {delivery_position}.")
+        logger.info(f"Livraison planifiée pour {user_steam_id}: {item_id} x{count} à {delivery_position}.")
         return True
     except Exception as e:
         logger.error(f"Erreur lors de la planification de la livraison: {e}")

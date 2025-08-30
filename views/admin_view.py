@@ -1,9 +1,9 @@
-# admin_view.py
 import discord
-from discord.ext import commands
+from datetime import datetime, timedelta
 from discord.ui import View, Button, Modal, TextInput
 from config.constants import ADMIN_ROLES
 from services.game_client import GameClient
+from services.timer_manager import TimerManager
 from utils.logger import logger
 
 class AdminView(View):
@@ -12,6 +12,7 @@ class AdminView(View):
         self.add_item(RebootSCUMButton())
         self.add_item(RebootBotButton())
         self.add_item(AnnounceButton())
+        self.add_item(StartTimerButton())
 
 class RebootSCUMButton(Button):
     def __init__(self):
@@ -70,3 +71,56 @@ class AnnounceModal(Modal):
             await interaction.followup.send(f"✅ Annonce envoyée: {message}", ephemeral=True)
         else:
             await interaction.followup.send(f"❌ Erreur lors de l'envoi de l'annonce: {result_message}", ephemeral=True)
+
+# Ajoutez cette classe à admin_view.py
+class StartTimerButton(Button):
+    def __init__(self):
+        super().__init__(label="Démarrer un Timer", style=discord.ButtonStyle.green, custom_id="start_timer")
+
+    async def callback(self, interaction: discord.Interaction):
+        if not any(role.id in ADMIN_ROLES for role in interaction.user.roles):
+            await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
+            return
+        await interaction.response.send_modal(TimerModal())
+
+class TimerModal(Modal):
+    def __init__(self):
+        super().__init__(title="Configurer un Timer")
+        self.channel_id = TextInput(
+            label="ID du Canal",
+            placeholder="Ex: 1407804333281640508",
+            required=True
+        )
+        self.duration = TextInput(
+            label="Durée (minutes)",
+            placeholder="Ex: 30",
+            required=True
+        )
+        self.event_name = TextInput(
+            label="Nom de l'événement",
+            placeholder="Ex: Drop d'armes",
+            required=True
+        )
+        self.add_item(self.channel_id)
+        self.add_item(self.duration)
+        self.add_item(self.event_name)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        try:
+            channel_id = int(self.channel_id.value)
+            duration = int(self.duration.value)
+            timer_manager = TimerManager()
+            timer_manager.set_bot(interaction.client)
+            success = await timer_manager.start_timer(
+                interaction.guild.id,
+                channel_id,
+                duration,
+                self.event_name.value
+            )
+            if success:
+                await interaction.followup.send(f"✅ Timer démarré pour **{self.event_name.value}** dans <#{channel_id}> ({duration} minutes).", ephemeral=True)
+            else:
+                await interaction.followup.send("❌ Erreur lors du démarrage du timer.", ephemeral=True)
+        except ValueError:
+            await interaction.followup.send("❌ ID de canal ou durée invalide.", ephemeral=True)

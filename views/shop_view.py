@@ -138,7 +138,8 @@ class BuyItemModal(discord.ui.Modal):
         price = ITEM_PRICES[self.item_id] * count
         if await ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
             new_balance = get_bank_balance(self.user_steam_id)
-            await interaction.followup.send(f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
+            await interaction.followup.send(
+                f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
         else:
             await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
 
@@ -150,9 +151,12 @@ class BuyItemModal(discord.ui.Modal):
         # Envoyer un message privé à l'utilisateur
         user = await self.bot.fetch_user(self.user_discord_id)
         delivery_position = random.choice(list(DELIVERY_POSITIONS.keys()))
-        await user.send(f"Votre commande de {count}x {self.item_id} a été enregistrée et sera livrée à {delivery_position} dans 20 minutes.")
+        await user.send(
+            f"Votre commande de {count}x {self.item_id} a été enregistrée et sera livrée à {delivery_position} dans 20 minutes.")
 
-        await interaction.followup.send(f"Commande de {count}x {self.item_id} enregistrée !\nLivraison prévue à {delivery_position} dans 20 minutes.", ephemeral=True)
+        await interaction.followup.send(
+            f"Commande de {count}x {self.item_id} enregistrée !\nLivraison prévue à {delivery_position} dans 20 minutes.",
+            ephemeral=True)
 
 class BuyVehicleButton(Button):
     def __init__(self, merchant_type: str, bot: commands.Bot):

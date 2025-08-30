@@ -27,6 +27,7 @@ CHANNELS = {
     "superette": 1406507683137327224,
     "admin_panel": 1393821678072631346,
     "status": 1407804333281640508,
+    "timer": 1407804333281640508,
 }
 
 # Canal d'inscription
