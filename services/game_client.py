@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from services.scum_manager import send_scum_command
 from utils.logger import logger
 
@@ -34,3 +36,7 @@ class GameClient:
         else:
             logger.error(f"Erreur lors de l'envoi de l'annonce: {message}")
             return False
+
+    @staticmethod
+    async def send_command(command: str) -> Tuple[bool, str]:
+        return await send_scum_command(command)

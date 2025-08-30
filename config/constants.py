@@ -92,6 +92,14 @@ METIER_COLORS = {
     "superette": discord.Color.purple()
 }
 
+# Positions de livraison
+DELIVERY_POSITIONS = {
+    "A4 - Croisement des pistes": (359517.538, -528322.718, 0),
+    "Z0 - Piste devant hangar": (-754535.977, -678349.9049, 0),
+    "B2 - Début de piste": (-198424.2325, -31863.4466, 0),
+    "Z4 - Piste proche bunker": (437363.6906, 560133.7958, 0)
+}
+
 # Messages d'annonce
 ANNOUNCE_MESSAGES = {
     "garage": {
@@ -123,3 +131,9 @@ ANNOUNCE_MESSAGES = {
 # Délais
 DELAY_BETWEEN_ACTIONS = 3  # Secondes entre chaque action pyautogui
 MAX_QUANTITY = 20
+
+# Position de téléportation pour les véhicules
+INSTANT_VEHICLE_POSITION = (-40915.480, -121644.586, 35180.148)
+
+# Délai de livraison (20 minutes)
+DELIVERY_TIME = 20 * 60

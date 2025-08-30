@@ -1,11 +1,16 @@
+import asyncio
+from typing import Tuple
+
 import discord
 from discord.ext import commands
 from discord.ext import tasks
 from config import settings
+from repositories.db_manager import initialize_delivery_db, get_pending_deliveries, update_delivery_status
 from repositories.ftp_repository import copy_tables_to_local_db
+from services.delivery_service import check_pending_deliveries
 from services.discord_service import DiscordService
 from services.scum_manager import ScumManager
-from config.constants import CHANNELS
+from config.constants import CHANNELS, DELIVERY_POSITIONS
 from utils.logger import logger
 from datetime import datetime
 
@@ -22,6 +27,9 @@ async def on_ready():
         if merchant_type in ["garage", "armurerie", "moto", "quincaillerie", "restaurateur", "superette"]:
             await DiscordService.send_shop_panel(bot, merchant_type)
 
+    # Initialiser la base de données des livraisons
+    initialize_delivery_db()
+
     # Copier les tables nécessaires à chaque démarrage
     copy_tables_to_local_db()
 
@@ -34,6 +42,8 @@ async def on_ready():
     update_status_embed.start()
     # Démarre la tâche de redémarrage automatique de SCUM
     bot.loop.create_task(scum_manager.start_periodic_reboot())
+    # Démarrer la tâche de gestion des livraisons
+    bot.loop.create_task(check_pending_deliveries(bot))
 
 @tasks.loop(minutes=5)
 async def update_status_embed():

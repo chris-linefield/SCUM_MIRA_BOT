@@ -31,13 +31,13 @@ class DiscordService:
                 title=f"🏪 {METIER_NAMES[merchant_type]}",
                 description=f"Bienvenue dans la boutique {METIER_NAMES[merchant_type]} ! Utilisez les boutons ci-dessous pour interagir.",
                 color=METIER_COLORS[merchant_type]
-            ), view=ShopView(merchant_type))
+            ), view=ShopView(merchant_type, bot))
         else:
             await channel.send(embed=discord.Embed(
                 title=f"🏪 {METIER_NAMES[merchant_type]}",
                 description=f"Bienvenue dans la boutique {METIER_NAMES[merchant_type]} ! Utilisez les boutons ci-dessous pour interagir.",
                 color=METIER_COLORS[merchant_type]
-            ), view=ShopView(merchant_type))
+            ), view=ShopView(merchant_type, bot))
 
         logger.info(f"Panel {merchant_type} envoyé dans le canal {channel.name}.")
 

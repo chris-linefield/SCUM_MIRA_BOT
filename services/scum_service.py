@@ -1,3 +1,6 @@
+import asyncio
+
+from config import INSTANT_VEHICLE_POSITION
 from repositories.scum_repository import get_bank_balance, update_bank_balance
 from services.game_client import GameClient
 from utils.logger import logger
@@ -29,5 +32,15 @@ class ScumService:
         if not update_bank_balance(user_steam_id, new_balance):
             logger.error(f"Erreur lors de la mise à jour du solde pour {user_steam_id}.")
             return False
+
+        # Téléportation avant le spawn du véhicule
+        x, y, z = INSTANT_VEHICLE_POSITION
+        teleport_command = f"#Teleport {x} {y} {z}"
+        success, _ = await GameClient.send_command(teleport_command)
+        if not success:
+            logger.error(f"Erreur lors de la téléportation pour le spawn du véhicule.")
+            return False
+
+        await asyncio.sleep(10)  # Attendre 10 secondes pour le chargement de la zone
 
         return await GameClient.spawn_vehicle(vehicle_id)
