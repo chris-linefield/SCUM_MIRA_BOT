@@ -4,7 +4,7 @@ from discord.ui import View, Button, Select
 from services.scum_service import ScumService
 from services.game_client import GameClient
 from repositories.user_repository import UserRepository
-from repositories.scum_repository import get_bank_balance
+from repositories.scum_repository import get_bank_balance, update_bank_balance
 from services.delivery_service import schedule_delivery
 from config.constants import ITEM_PRICES, MAX_QUANTITY, METIER_ITEMS, ANNOUNCE_MESSAGES, DELIVERY_POSITIONS
 from utils.logger import logger
@@ -136,23 +136,49 @@ class BuyItemModal(discord.ui.Modal):
         await interaction.response.defer(ephemeral=True)
         count = int(self.count.value)
         price = ITEM_PRICES[self.item_id] * count
-        if await ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
-            new_balance = get_bank_balance(self.user_steam_id)
-            await interaction.followup.send(
-                f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
-        else:
-            await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
+        balance = get_bank_balance(self.user_steam_id)
+
+        if balance < price:
+            await interaction.followup.send("⚠️ **Erreur** : Solde insuffisant pour effectuer cet achat.",
+                                            ephemeral=True)
+            return
+
+        new_balance = balance - price
+        if not update_bank_balance(self.user_steam_id, new_balance):
+            await interaction.followup.send("⚠️ **Erreur** : Impossible de mettre à jour votre solde.", ephemeral=True)
+            return
+
+        if not await ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
+            await interaction.followup.send("⚠️ **Erreur** : Erreur lors de l'achat.", ephemeral=True)
+            return
+
+        new_balance = get_bank_balance(self.user_steam_id)
 
         # Planifier la livraison
         if not await schedule_delivery(self.bot, self.user_discord_id, self.user_steam_id, self.item_id, count):
-            await interaction.followup.send("Erreur lors de la planification de la livraison.", ephemeral=True)
+            await interaction.followup.send("⚠️ **Erreur** : Erreur lors de la planification de la livraison.",
+                                            ephemeral=True)
             return
 
-        # Envoyer un message privé à l'utilisateur
+        # Envoyer un message privé immersif et roleplay
         user = await self.bot.fetch_user(self.user_discord_id)
         delivery_position = random.choice(list(DELIVERY_POSITIONS.keys()))
-        await user.send(
-            f"Votre commande de {count}x {self.item_id} a été enregistrée et sera livrée à {delivery_position} dans 20 minutes.")
+
+        # Message immersif et roleplay
+        message = (
+            f"📜 **Contrat de Livraison M.I.R.A** 📜\n\n"
+            f"Cher Client,\n\n"
+            f"Votre commande de **{count}x {self.item_id}** a été enregistrée avec succès.\n"
+            f"Le montant de **{price}** a été prélevé de votre compte.\n\n"
+            f"📍 **Lieu de livraison** : {delivery_position}\n"
+            f"⏰ **Heure de livraison** : Dans 20 minutes\n\n"
+            f"Veuillez vous rendre sur place pour récupérer votre commande.\n"
+            f"En cas de problème, contactez le service client M.I.R.A.\n\n"
+            f"Cordialement,\n"
+            f"**M.I.R.A Logistics**"
+        )
+
+        await user.send(message)
 
         await interaction.followup.send(
             f"Commande de {count}x {self.item_id} enregistrée !\nLivraison prévue à {delivery_position} dans 20 minutes.",
@@ -195,8 +221,40 @@ class VehicleSelect(Select):
         await interaction.response.defer(ephemeral=True)
         vehicle_id = self.values[0]
         price = ITEM_PRICES[vehicle_id]
-        if await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, price):
-            new_balance = get_bank_balance(self.user_steam_id)
-            await interaction.followup.send(f"Achat du véhicule {vehicle_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
-        else:
-            await interaction.followup.send("Solde insuffisant ou erreur lors de l'achat.", ephemeral=True)
+        balance = get_bank_balance(self.user_steam_id)
+
+        if balance < price:
+            await interaction.followup.send("⚠️ **Erreur** : Solde insuffisant pour effectuer cet achat.",
+                                            ephemeral=True)
+            return
+
+        new_balance = balance - price
+        if not update_bank_balance(self.user_steam_id, new_balance):
+            await interaction.followup.send("⚠️ **Erreur** : Impossible de mettre à jour votre solde.", ephemeral=True)
+            return
+
+        if not await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, price):
+            await interaction.followup.send("⚠️ **Erreur** : Erreur lors de l'achat du véhicule.", ephemeral=True)
+            return
+
+        new_balance = get_bank_balance(self.user_steam_id)
+
+        # Envoyer un message privé immersif et roleplay
+        user = await self.bot.fetch_user(self.user_discord_id)
+
+        # Message immersif et roleplay
+        message = (
+            f"📜 **Contrat d'Achat de Véhicule M.I.R.A** 📜\n\n"
+            f"Cher Client,\n\n"
+            f"Votre achat du véhicule **{vehicle_id}** a été finalisé avec succès.\n"
+            f"Le montant de **{price}** a été prélevé de votre compte.\n\n"
+            f"Votre véhicule est prêt à être récupéré à la position de spawn.\n"
+            f"En cas de problème, contactez le service client M.I.R.A.\n\n"
+            f"Cordialement,\n"
+            f"**M.I.R.A Vehicles**"
+        )
+
+        await user.send(message)
+
+        await interaction.followup.send(
+            f"Achat du véhicule {vehicle_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)

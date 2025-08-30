@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Tuple
 from repositories.db_manager import add_delivery, get_pending_deliveries, update_delivery_status
 from config.constants import DELIVERY_POSITIONS, DELIVERY_TIME
+from repositories.scum_repository import get_bank_balance
 from services.scum_manager import send_scum_command
 from utils.logger import logger
 
@@ -38,12 +39,19 @@ async def check_pending_deliveries(bot):
 
 async def process_delivery(bot, delivery_id: int, user_id: int, steam_id: str, item_id: str, quantity: int, delivery_position: str, delivery_time: str):
     """Traite une livraison en cours."""
+    from datetime import datetime
     delivery_time = datetime.strptime(delivery_time, "%Y-%m-%d %H:%M:%S")
     now = datetime.now()
     time_until_delivery = (delivery_time - now).total_seconds()
 
     if time_until_delivery <= 0:
-        # Livraison en retard, la traiter immédiatement
+        # Vérifier le solde avant la livraison
+        balance = get_bank_balance(steam_id)
+        if balance is None:
+            logger.error(f"Erreur lors de la récupération du solde pour {steam_id}.")
+            return
+
+        # Exécuter la livraison
         await execute_delivery(delivery_id, steam_id, item_id, quantity, delivery_position)
     elif time_until_delivery <= 300:  # 5 minutes avant la livraison
         if time_until_delivery <= 60:  # 1 minute avant la livraison

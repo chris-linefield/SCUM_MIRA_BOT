@@ -13,6 +13,7 @@ class AdminView(View):
         self.add_item(RebootBotButton())
         self.add_item(AnnounceButton())
         self.add_item(StartTimerButton())
+        self.add_item(CancelTimerButton())
 
 class RebootSCUMButton(Button):
     def __init__(self):
@@ -110,17 +111,57 @@ class TimerModal(Modal):
         try:
             channel_id = int(self.channel_id.value)
             duration = int(self.duration.value)
-            timer_manager = TimerManager()
-            timer_manager.set_bot(interaction.client)
-            success = await timer_manager.start_timer(
+            success = await interaction.client.timer_manager.start_timer(
+                interaction.client,  # Passe le bot
                 interaction.guild.id,
                 channel_id,
                 duration,
                 self.event_name.value
             )
             if success:
-                await interaction.followup.send(f"✅ Timer démarré pour **{self.event_name.value}** dans <#{channel_id}> ({duration} minutes).", ephemeral=True)
+                await interaction.followup.send(
+                    f"✅ Timer démarré pour **{self.event_name.value}** dans <#{channel_id}> ({duration} minutes).",
+                    ephemeral=True
+                )
             else:
                 await interaction.followup.send("❌ Erreur lors du démarrage du timer.", ephemeral=True)
         except ValueError:
             await interaction.followup.send("❌ ID de canal ou durée invalide.", ephemeral=True)
+
+class CancelTimerButton(Button):
+    def __init__(self):
+        super().__init__(label="Annuler un Timer", style=discord.ButtonStyle.red, custom_id="cancel_timer")
+
+    async def callback(self, interaction: discord.Interaction):
+        if not any(role.id in ADMIN_ROLES for role in interaction.user.roles):
+            await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
+            return
+
+        await interaction.response.send_modal(CancelTimerModal())
+
+class CancelTimerModal(Modal):
+    def __init__(self):
+        super().__init__(title="Annuler un Timer")
+        self.message_id = TextInput(
+            label="ID du Message du Timer",
+            placeholder="Ex: 123456789012345678",
+            required=True
+        )
+        self.add_item(self.message_id)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
+        try:
+            message_id = int(self.message_id.value)
+            timer_manager = interaction.client.timer_manager  # Accès au TimerManager via le bot
+            success = await timer_manager.cancel_timer(
+                interaction.guild.id,
+                interaction.channel.id,
+                message_id
+            )
+            if success:
+                await interaction.followup.send(f"✅ Timer annulé.", ephemeral=True)
+            else:
+                await interaction.followup.send("❌ Timer introuvable.", ephemeral=True)
+        except ValueError:
+            await interaction.followup.send("❌ ID de message invalide.", ephemeral=True)

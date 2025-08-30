@@ -46,8 +46,7 @@ async def on_ready():
     # Démarrer la tâche de gestion des livraisons
     bot.loop.create_task(check_pending_deliveries(bot))
 
-    timer_manager = TimerManager()
-    timer_manager.set_bot(bot)
+    bot.timer_manager = TimerManager()
 
 @tasks.loop(minutes=5)
 async def update_status_embed():
