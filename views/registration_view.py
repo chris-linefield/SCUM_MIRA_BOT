@@ -1,3 +1,4 @@
+# registration_view.py
 import discord
 from discord.ui import View, Modal, TextInput
 from discord import Interaction, Embed
@@ -45,6 +46,7 @@ class SteamRegistrationModal(Modal):
                 ephemeral=True
             )
             return
+
         success = self.user_repo.link_steam_id(
             interaction.user.id,
             self.steam_id.value,
@@ -53,18 +55,63 @@ class SteamRegistrationModal(Modal):
             self.crime.value,
             self.sentence.value
         )
+
         if not success:
             await interaction.response.send_message(
                 "❌ **Erreur M.I.R.A** : Échec de l'enregistrement. Vérifiez votre SteamID.",
                 ephemeral=True
             )
             return
+
+        # Envoie un message de confirmation publique
         await interaction.response.send_message(f"✅ **Enregistrement validé, unité {interaction.user.id}**", ephemeral=True)
+
+        # Envoie un message privé avec les informations confidentielles
+        try:
+            private_embed = Embed(
+                title="🔒 ACCÈS AUTORISÉ - M.I.R.A",
+                description="Un terminal s'allume devant vous avec un bruit mécanique.\nUn message clignote en vert sur l'écran:",
+                color=discord.Color.dark_green()
+            )
+            private_embed.add_field(
+                name="🔊 M.I.R.A (voix synthétique) :",
+                value=f"Bienvenue, **{self.name.value}**, âgé de **{self.age.value} ans**, condamné pour **{self.crime.value}** ({self.sentence.value}).\nVotre enregistrement est complet.",
+                inline=False
+            )
+            private_embed.add_field(name="🌐 Adresse IP de l'île", value="176.57.173.98:28702", inline=False)
+            private_embed.add_field(name="🔑 Mot de passe d'accès", value="MIRA072025", inline=False)
+            private_embed.add_field(name="🎮 SteamID enregistré", value=self.steam_id.value, inline=False)
+            private_embed.set_footer(text="⚠️ Ces informations sont confidentielles. Toute divulgation sera punie.")
+
+            await interaction.user.send(embed=private_embed)
+        except discord.Forbidden:
+            logger.warning(f"Impossible d'envoyer un message privé à {interaction.user} (DM fermés).")
+            await interaction.followup.send(
+                "⚠️ **Attention** : Vos informations d'accès ont été enregistrées, mais je ne peux pas vous envoyer de message privé (vérifiez vos paramètres Discord).\n"
+                "Voici vos informations (à conserver précieusement) :\n"
+                f"- **Adresse IP** : 176.57.173.98:28702\n"
+                f"- **Mot de passe** : MIRA072025\n"
+                f"- **SteamID** : {self.steam_id.value}",
+                ephemeral=True
+            )
+
         logger.info(f"Utilisateur {interaction.user.id} ({self.name.value}) a complété son enregistrement.")
 
 def send_registration_message():
-    embed = Embed(title="ENREGISTREMENT OBLIGATOIRE - M.I.R.A", description="*La pièce est froide et stérile. Une voix synthétique résonne:*\n\n**🔊 M.I.R.A :** \"Bienvenue, unité désignée. Complétez votre enregistrement.\"", color=discord.Color.dark_red())
-    embed.add_field(name="📝 **Informations requises**", value="**Nom et prénom** : Identité officielle\n**Âge** : Âge biologique\n**Crime(s)** : Infractions commises\n**Durée de peine** : Temps de condamnation\n**SteamID64** : Votre identité numérique (17 chiffres)", inline=False)
+    embed = Embed(
+        title="ENREGISTREMENT OBLIGATOIRE - M.I.R.A",
+        description="*La pièce est froide et stérile. Une voix synthétique résonne:*\n\n**🔊 M.I.R.A :** \"Bienvenue, unité désignée. Complétez votre enregistrement.\"",
+        color=discord.Color.dark_red()
+    )
+    embed.add_field(
+        name="📝 **Informations requises**",
+        value="**Nom et prénom** : Identité officielle\n"
+              "**Âge** : Âge biologique\n"
+              "**Crime(s)** : Infractions commises\n"
+              "**Durée de peine** : Temps de condamnation\n"
+              "**SteamID64** : Votre identité numérique (17 chiffres)",
+        inline=False
+    )
     embed.set_footer(text="⚠️ Conformité immédiate requise.")
     view = View(timeout=None)
     view.add_item(SteamLinkButton())
