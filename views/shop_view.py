@@ -143,23 +143,9 @@ class BuyItemModal(discord.ui.Modal):
                                             ephemeral=True)
             return
 
-        new_balance = balance - price
-        set_balance_command = f"#SetCurrencyBalance Normal {new_balance} {self.user_steam_id}"
-        success, message = await GameClient.send_command(set_balance_command)
+        success = await ScumService.buy_item(self.user_steam_id, self.item_id, count, price, self.merchant_type)
         if not success:
-            await interaction.followup.send("⚠️ **Erreur** : Impossible de mettre à jour votre solde.", ephemeral=True)
-            return
-
-        if not update_bank_balance(self.user_steam_id, new_balance):
-            await interaction.followup.send("⚠️ **Erreur** : Impossible de mettre à jour votre solde local.",
-                                            ephemeral=True)
-            return
-
-        # Planifier la livraison
-        if not await schedule_delivery(self.bot, self.user_discord_id, self.user_steam_id, self.item_id, count,
-                                       self.merchant_type):
-            await interaction.followup.send("⚠️ **Erreur** : Erreur lors de la planification de la livraison.",
-                                            ephemeral=True)
+            await interaction.followup.send("⚠️ **Erreur** : Erreur lors de l'achat.", ephemeral=True)
             return
 
         new_balance = get_bank_balance(self.user_steam_id)
@@ -171,11 +157,9 @@ class BuyItemModal(discord.ui.Modal):
         message = (
             f"📜 **Contrat de Livraison M.I.R.A** 📜\n\n"
             f"Cher Client,\n\n"
-            f"Votre commande de **{count}x {self.item_id}** a été enregistrée avec succès.\n"
+            f"Votre commande de **{count}x {self.item_id}** a été traitée avec succès.\n"
             f"Le montant de **{price}** a été prélevé de votre compte.\n\n"
-            f"📍 **Lieu de livraison** : {self.merchant_type}\n"
-            f"⏰ **Heure de livraison** : Dans 20 minutes\n\n"
-            f"Veuillez vous rendre sur place pour récupérer votre commande.\n"
+            f"Votre commande est prête à être récupérée au **{self.merchant_type}**. \n\n"
             f"En cas de problème, contactez le service client M.I.R.A.\n\n"
             f"Cordialement,\n"
             f"**M.I.R.A Logistics**"
@@ -184,8 +168,7 @@ class BuyItemModal(discord.ui.Modal):
         await user.send(message)
 
         await interaction.followup.send(
-            f"Commande de {count}x {self.item_id} enregistrée !\nLivraison prévue au {self.merchant_type} dans 20 minutes.",
-            ephemeral=True)
+            f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
 
 class BuyVehicleButton(Button):
     def __init__(self, merchant_type: str, bot: commands.Bot):
@@ -231,12 +214,8 @@ class VehicleSelect(Select):
                                             ephemeral=True)
             return
 
-        new_balance = balance - price
-        if not update_bank_balance(self.user_steam_id, new_balance):
-            await interaction.followup.send("⚠️ **Erreur** : Impossible de mettre à jour votre solde.", ephemeral=True)
-            return
-
-        if not await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, price):
+        success = await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, price)
+        if not success:
             await interaction.followup.send("⚠️ **Erreur** : Erreur lors de l'achat du véhicule.", ephemeral=True)
             return
 
@@ -251,7 +230,7 @@ class VehicleSelect(Select):
             f"Cher Client,\n\n"
             f"Votre achat du véhicule **{vehicle_id}** a été finalisé avec succès.\n"
             f"Le montant de **{price}** a été prélevé de votre compte.\n\n"
-            f"Votre véhicule est prêt à être récupéré à la position de spawn.\n"
+            f"Votre véhicule est prêt à être récupéré.\n"
             f"En cas de problème, contactez le service client M.I.R.A.\n\n"
             f"Cordialement,\n"
             f"**M.I.R.A Vehicles**"
