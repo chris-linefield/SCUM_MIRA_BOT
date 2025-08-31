@@ -101,6 +101,16 @@ DELIVERY_POSITIONS = {
     "Z4 - Piste proche bunker": (437363.6906, 560133.7958, 0)
 }
 
+# Positions de livraison par marchand
+MERCHANT_DELIVERY_POSITIONS = {
+    "garage": (-41297.051, -121472.367, 35180.148),
+    "moto": (-41297.051, -121472.367, 35180.148),
+    "armurerie": (0, 0, 0),  # À définir
+    "quincaillerie": (0, 0, 0),  # À définir
+    "restaurateur": (0, 0, 0),  # À définir
+    "superette": (0, 0, 0)  # À définir
+}
+
 # Messages d'annonce
 ANNOUNCE_MESSAGES = {
     "garage": {
@@ -134,7 +144,7 @@ DELAY_BETWEEN_ACTIONS = 3  # Secondes entre chaque action pyautogui
 MAX_QUANTITY = 20
 
 # Position de téléportation pour les véhicules
-INSTANT_VEHICLE_POSITION = (-40915.480, -121644.586, 35180.148)
+INSTANT_VEHICLE_POSITION = (-41297.051, -121472.367, 35180.148)
 
 # Délai de livraison (20 minutes)
 DELIVERY_TIME = 20 * 60

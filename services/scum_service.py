@@ -15,8 +15,14 @@ class ScumService:
             return False
 
         new_balance = balance - total_price
+        set_balance_command = f"#SetCurrencyBalance Normal {new_balance} {user_steam_id}"
+        success, message = await GameClient.send_command(set_balance_command)
+        if not success:
+            logger.error(f"Erreur lors de la mise à jour du solde pour {user_steam_id}: {message}")
+            return False
+
         if not update_bank_balance(user_steam_id, new_balance):
-            logger.error(f"Erreur lors de la mise à jour du solde pour {user_steam_id}.")
+            logger.error(f"Erreur lors de la mise à jour du solde local pour {user_steam_id}.")
             return False
 
         return await GameClient.spawn_item(item_id, count)
@@ -29,8 +35,14 @@ class ScumService:
             return False
 
         new_balance = balance - price
+        set_balance_command = f"#SetCurrencyBalance Normal {new_balance} {user_steam_id}"
+        success, message = await GameClient.send_command(set_balance_command)
+        if not success:
+            logger.error(f"Erreur lors de la mise à jour du solde pour {user_steam_id}: {message}")
+            return False
+
         if not update_bank_balance(user_steam_id, new_balance):
-            logger.error(f"Erreur lors de la mise à jour du solde pour {user_steam_id}.")
+            logger.error(f"Erreur lors de la mise à jour du solde local pour {user_steam_id}.")
             return False
 
         # Téléportation avant le spawn du véhicule

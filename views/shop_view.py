@@ -144,25 +144,28 @@ class BuyItemModal(discord.ui.Modal):
             return
 
         new_balance = balance - price
-        if not update_bank_balance(self.user_steam_id, new_balance):
+        set_balance_command = f"#SetCurrencyBalance Normal {new_balance} {self.user_steam_id}"
+        success, message = await GameClient.send_command(set_balance_command)
+        if not success:
             await interaction.followup.send("⚠️ **Erreur** : Impossible de mettre à jour votre solde.", ephemeral=True)
             return
 
-        if not await ScumService.buy_item(self.user_steam_id, self.item_id, count, price):
-            await interaction.followup.send("⚠️ **Erreur** : Erreur lors de l'achat.", ephemeral=True)
+        if not update_bank_balance(self.user_steam_id, new_balance):
+            await interaction.followup.send("⚠️ **Erreur** : Impossible de mettre à jour votre solde local.",
+                                            ephemeral=True)
             return
 
-        new_balance = get_bank_balance(self.user_steam_id)
-
         # Planifier la livraison
-        if not await schedule_delivery(self.bot, self.user_discord_id, self.user_steam_id, self.item_id, count):
+        if not await schedule_delivery(self.bot, self.user_discord_id, self.user_steam_id, self.item_id, count,
+                                       self.merchant_type):
             await interaction.followup.send("⚠️ **Erreur** : Erreur lors de la planification de la livraison.",
                                             ephemeral=True)
             return
 
+        new_balance = get_bank_balance(self.user_steam_id)
+
         # Envoyer un message privé immersif et roleplay
         user = await self.bot.fetch_user(self.user_discord_id)
-        delivery_position = random.choice(list(DELIVERY_POSITIONS.keys()))
 
         # Message immersif et roleplay
         message = (
@@ -170,7 +173,7 @@ class BuyItemModal(discord.ui.Modal):
             f"Cher Client,\n\n"
             f"Votre commande de **{count}x {self.item_id}** a été enregistrée avec succès.\n"
             f"Le montant de **{price}** a été prélevé de votre compte.\n\n"
-            f"📍 **Lieu de livraison** : {delivery_position}\n"
+            f"📍 **Lieu de livraison** : {self.merchant_type}\n"
             f"⏰ **Heure de livraison** : Dans 20 minutes\n\n"
             f"Veuillez vous rendre sur place pour récupérer votre commande.\n"
             f"En cas de problème, contactez le service client M.I.R.A.\n\n"
@@ -181,7 +184,7 @@ class BuyItemModal(discord.ui.Modal):
         await user.send(message)
 
         await interaction.followup.send(
-            f"Commande de {count}x {self.item_id} enregistrée !\nLivraison prévue à {delivery_position} dans 20 minutes.",
+            f"Commande de {count}x {self.item_id} enregistrée !\nLivraison prévue au {self.merchant_type} dans 20 minutes.",
             ephemeral=True)
 
 class BuyVehicleButton(Button):
