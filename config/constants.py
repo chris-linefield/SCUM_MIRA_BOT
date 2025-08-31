@@ -36,8 +36,11 @@ REGISTRATION_CHANNEL_ID = 1405516212854722691
 # Prix des items
 ITEM_PRICES = {
     # Garage
-    "Car_Repair_Kit": 1,
-    "Gasoline_Canister": 1,
+    "Car_Repair_Kit": 2500,
+    "Gasoline_Canister": 2500,
+    "Big_Vehicle_StorageRack": 7600,
+    "Medium_Vehicle_StorageRack": 4400,
+    "Small_Vehicle_StorageRack": 2640,
     # Armurerie
     "Grinding_Stone_02": 3000,
     "Weapon_Cleaning_Kit": 5200,
@@ -50,9 +53,13 @@ ITEM_PRICES = {
     "VegetableOil": 800,
     "Vinegar": 500,
     # Véhicules
-    "BPC_WolfsWagen": 1,
-    "BPC_Cruiser": 1,
-    "BPC_Dirtbike": 1,
+    "BPC_WolfsWagen": 4800,
+    "BPC_Laika": 4400,
+    "BPC_Rager": 7200,
+    "BPC_RIS": 2800,
+    "BPC_Tractor": 2800,
+    "BPC_Cruiser": 2560,
+    "BPC_Dirtbike": 2000,
     # Superette
     "Sewing_kit": 480,
 }
@@ -60,8 +67,8 @@ ITEM_PRICES = {
 # Items par métier
 METIER_ITEMS = {
     "garage": {
-        "materials": ["Car_Repair_Kit", "Gasoline_Canister"],
-        "vehicles": ["BPC_WolfsWagen"]
+        "materials": ["Car_Repair_Kit", "Gasoline_Canister", "Big_Vehicle_StorageRack", "Medium_Vehicle_StorageRack", "Small_Vehicle_StorageRack"],
+        "vehicles": ["BPC_WolfsWagen", "BPC_Laika", "BPC_Rager", "BPC_RIS", "BPC_Tractor"],
     },
     "moto": {
         "materials": ["Car_Repair_Kit", "Gasoline_Canister"],
