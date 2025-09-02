@@ -69,7 +69,7 @@ def copy_tables_to_local_db():
                     )
 
         local_conn.commit()
-        logger.info("Tables copiées avec succès dans scum_bot.db.")
+        logger.info("Tables écrasées et recopiées avec succès dans scum_bot.db.")
         return True
     except Exception as e:
         logger.error(f"Erreur lors de la copie des tables: {e}")
