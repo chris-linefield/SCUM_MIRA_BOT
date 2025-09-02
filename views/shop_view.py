@@ -1,14 +1,13 @@
 import discord
-from discord.ext import commands  # Ajout de l'import correct
+from discord.ext import commands
 from discord.ui import View, Button, Select
 from services.scum_service import ScumService
 from services.game_client import GameClient
 from repositories.user_repository import UserRepository
 from repositories.scum_repository import get_bank_balance, update_bank_balance
-from services.delivery_service import schedule_delivery
-from config.constants import ITEM_PRICES, MAX_QUANTITY, METIER_ITEMS, ANNOUNCE_MESSAGES, DELIVERY_POSITIONS
+from repositories.ftp_repository import copy_tables_to_local_db
+from config.constants import ITEM_PRICES, MAX_QUANTITY, METIER_ITEMS, ANNOUNCE_MESSAGES, MERCHANT_DELIVERY_POSITIONS
 from utils.logger import logger
-import random
 
 class ShopView(View):
     def __init__(self, merchant_type: str, bot: commands.Bot):
@@ -30,6 +29,8 @@ class OpenShopButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+        # Copie des données à jour
+        copy_tables_to_local_db()
         message = ANNOUNCE_MESSAGES[self.merchant_type]["open"]
         if await GameClient.announce(message):
             await interaction.followup.send(f"Annonce d'ouverture envoyée: {message}", ephemeral=True)
@@ -44,6 +45,8 @@ class CloseShopButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+        # Copie des données à jour
+        copy_tables_to_local_db()
         message = ANNOUNCE_MESSAGES[self.merchant_type]["close"]
         if await GameClient.announce(message):
             await interaction.followup.send(f"Annonce de fermeture envoyée: {message}", ephemeral=True)
@@ -57,6 +60,8 @@ class CheckBalanceButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+        # Copie des données à jour
+        copy_tables_to_local_db()
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
@@ -90,6 +95,8 @@ class BuyItemButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+        # Copie des données à jour
+        copy_tables_to_local_db()
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
@@ -134,13 +141,14 @@ class BuyItemModal(discord.ui.Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+        # Copie des données à jour
+        copy_tables_to_local_db()
         count = int(self.count.value)
         price = ITEM_PRICES[self.item_id] * count
         balance = get_bank_balance(self.user_steam_id)
 
         if balance < price:
-            await interaction.followup.send("⚠️ **Erreur** : Solde insuffisant pour effectuer cet achat.",
-                                            ephemeral=True)
+            await interaction.followup.send("⚠️ **Erreur** : Solde insuffisant pour effectuer cet achat.", ephemeral=True)
             return
 
         success = await ScumService.buy_item(self.user_steam_id, self.item_id, count, price, self.merchant_type)
@@ -167,8 +175,7 @@ class BuyItemModal(discord.ui.Modal):
 
         await user.send(message)
 
-        await interaction.followup.send(
-            f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
+        await interaction.followup.send(f"Achat de {count}x {self.item_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
 
 class BuyVehicleButton(Button):
     def __init__(self, merchant_type: str, bot: commands.Bot):
@@ -178,6 +185,8 @@ class BuyVehicleButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+        # Copie des données à jour
+        copy_tables_to_local_db()
         user_repo = UserRepository()
         user = user_repo.get_user(interaction.user.id)
         if not user:
@@ -205,13 +214,14 @@ class VehicleSelect(Select):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+        # Copie des données à jour
+        copy_tables_to_local_db()
         vehicle_id = self.values[0]
         price = ITEM_PRICES[vehicle_id]
         balance = get_bank_balance(self.user_steam_id)
 
         if balance < price:
-            await interaction.followup.send("⚠️ **Erreur** : Solde insuffisant pour effectuer cet achat.",
-                                            ephemeral=True)
+            await interaction.followup.send("⚠️ **Erreur** : Solde insuffisant pour effectuer cet achat.", ephemeral=True)
             return
 
         success = await ScumService.buy_vehicle(self.user_steam_id, vehicle_id, price)
@@ -238,5 +248,4 @@ class VehicleSelect(Select):
 
         await user.send(message)
 
-        await interaction.followup.send(
-            f"Achat du véhicule {vehicle_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)
+        await interaction.followup.send(f"Achat du véhicule {vehicle_id} effectué !\nNouveau solde : **{new_balance}**.", ephemeral=True)

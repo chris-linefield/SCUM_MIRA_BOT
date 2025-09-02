@@ -27,10 +27,7 @@ async def check_pending_deliveries(bot):
     """Vérifie et traite les livraisons en cours."""
     while True:
         try:
-            pending_deliveries = get_pending_deliveries()
-            for delivery in pending_deliveries:
-                delivery_id, user_id, steam_id, item_id, quantity, merchant_type, delivery_time, _ = delivery
-                await process_delivery(bot, delivery_id, user_id, steam_id, item_id, quantity, merchant_type, delivery_time)
+            # Il n'y a plus de livraisons différées, donc cette fonction peut être simplifiée ou supprimée
             await asyncio.sleep(60)  # Vérifier toutes les minutes
         except Exception as e:
             logger.error(f"Erreur dans check_pending_deliveries: {e}")

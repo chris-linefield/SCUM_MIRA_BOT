@@ -1,9 +1,8 @@
-import asyncio
-
-from config import INSTANT_VEHICLE_POSITION, MERCHANT_DELIVERY_POSITIONS
 from repositories.scum_repository import get_bank_balance, update_bank_balance
 from services.game_client import GameClient
+from config.constants import INSTANT_VEHICLE_POSITION, MERCHANT_DELIVERY_POSITIONS
 from utils.logger import logger
+import asyncio
 
 class ScumService:
     @staticmethod
