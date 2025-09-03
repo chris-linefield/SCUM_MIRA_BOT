@@ -2,6 +2,7 @@ import discord
 from datetime import datetime, timedelta
 from discord.ui import View, Button, Modal, TextInput
 from config.constants import ADMIN_ROLES
+from repositories.ftp_repository import copy_tables_to_local_db
 from services.game_client import GameClient
 from services.timer_manager import TimerManager
 from utils.logger import logger
@@ -14,6 +15,23 @@ class AdminView(View):
         self.add_item(AnnounceButton())
         self.add_item(StartTimerButton())
         self.add_item(CancelTimerButton())
+        self.add_item(SyncDatabaseButton())
+
+class SyncDatabaseButton(Button):
+    def __init__(self):
+        super().__init__(label="Synchroniser la Base de Données", style=discord.ButtonStyle.blurple, custom_id="sync_database")
+
+    async def callback(self, interaction: discord.Interaction):
+        if not any(role.id in ADMIN_ROLES for role in interaction.user.roles):
+            await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
+            return
+
+        await interaction.response.defer(ephemeral=True)
+        success = copy_tables_to_local_db()
+        if success:
+            await interaction.followup.send("✅ Base de données synchronisée avec succès.", ephemeral=True)
+        else:
+            await interaction.followup.send("❌ Erreur lors de la synchronisation de la base de données.", ephemeral=True)
 
 class RebootSCUMButton(Button):
     def __init__(self):
