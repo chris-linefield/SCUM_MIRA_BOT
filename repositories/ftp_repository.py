@@ -33,6 +33,18 @@ def get_scum_db_connection():
     return sqlite3.connect(settings.scum_db_path)
 
 def copy_tables_to_local_db():
+    # Supprimer l'ancienne base de données SCUM.db
+    if os.path.exists(settings.scum_db_path):
+        os.remove(settings.scum_db_path)
+        logger.info("Ancienne base de données SCUM.db supprimée.")
+
+    # Télécharger une nouvelle version de SCUM.db
+    ftp = FTPRepository()
+    if not ftp.download_scum_db(settings.scum_db_path):
+        logger.error("Erreur lors du téléchargement de la nouvelle base de données SCUM.db.")
+        return False
+    ftp.close()
+
     scum_conn = get_scum_db_connection()
     if not scum_conn:
         logger.error("Impossible de se connecter à la base de données SCUM.db.")
