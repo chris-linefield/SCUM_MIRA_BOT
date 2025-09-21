@@ -151,7 +151,7 @@ DELAY_BETWEEN_ACTIONS = 3  # Secondes entre chaque action pyautogui
 MAX_QUANTITY = 20
 
 # Position de téléportation pour les véhicules
-INSTANT_VEHICLE_POSITION = (-41297.051, -121472.367, 35180.148)
+INSTANT_VEHICLE_POSITION = (-46050.273, -119181.414, 32178.090)
 
 # Délai de livraison (20 minutes)
 DELIVERY_TIME = 20 * 60
