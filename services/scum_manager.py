@@ -155,21 +155,21 @@ class ScumManager:
             return False
 
     def send_command(self, command: str) -> Tuple[bool, str]:
-        """Envoie une commande à SCUM."""
+        """Envoie une commande à SCUM avec délais optimisés."""
         if not self.is_scum_running():
             return False, "SCUM n'est pas ouvert"
         if not self.focus_scum_window():
             return False, "Impossible de focuser SCUM"
         try:
             pyautogui.press('t')
-            pyautogui.sleep(2.0)
+            pyautogui.sleep(1.0)
             pyperclip.copy(command)
             pyautogui.hotkey('ctrl', 'v')
-            pyautogui.sleep(2.0)
+            pyautogui.sleep(1.0)
             pyautogui.press('enter')
-            pyautogui.sleep(2.0)
+            pyautogui.sleep(1.5)  # Délai avant validation
             pyautogui.press('enter')
-            pyautogui.sleep(2.0)
+            pyautogui.sleep(1.0)
             return True, "Commande envoyée"
         except Exception as e:
             logger.error(f"Erreur envoi commande: {str(e)}")
@@ -177,7 +177,7 @@ class ScumManager:
 
 async def send_scum_command(command: str, max_retries: int = 3) -> Tuple[bool, str]:
     """Envoie une commande à SCUM avec gestion des erreurs et des réessais."""
-    scum_manager = ScumManager()  # Instancie ScumManager
+    scum_manager = ScumManager()
     for attempt in range(max_retries):
         if not scum_manager.is_scum_running():
             if attempt == max_retries - 1:

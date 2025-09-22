@@ -15,7 +15,8 @@ def initialize_delivery_db():
                 quantity INTEGER NOT NULL,
                 merchant_type TEXT NOT NULL,
                 delivery_time DATETIME NOT NULL,
-                status TEXT DEFAULT 'pending'
+                status TEXT DEFAULT 'pending',
+                is_pack BOOLEAN DEFAULT 0
             )
         """)
         conn.commit()
@@ -25,17 +26,17 @@ def initialize_delivery_db():
     finally:
         conn.close()
 
-def add_delivery(user_id: int, steam_id: str, item_id: str, quantity: int, merchant_type: str, delivery_time: str) -> bool:
+def add_delivery(user_id: int, steam_id: str, item_id: str, quantity: int, merchant_type: str, delivery_time: str, is_pack: bool = False) -> bool:
     conn = sqlite3.connect(settings.local_db_path)
     try:
         cursor = conn.cursor()
         cursor.execute(
             """
             INSERT INTO pending_deliveries
-            (user_id, steam_id, item_id, quantity, merchant_type, delivery_time)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (user_id, steam_id, item_id, quantity, merchant_type, delivery_time, is_pack)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (user_id, steam_id, item_id, quantity, merchant_type, delivery_time)
+            (user_id, steam_id, item_id, quantity, merchant_type, delivery_time, 1 if is_pack else 0)
         )
         conn.commit()
         logger.info(f"Livraison ajoutée pour {steam_id}: {item_id} x{quantity} au {merchant_type}.")

@@ -1,6 +1,6 @@
+# Rôles Discord
 import discord
 
-# Rôles Discord
 ROLES = {
     "garage": 1405192378066796606,
     "armurerie": 1405501043684545556,
@@ -62,6 +62,16 @@ ITEM_PRICES = {
     "BPC_Dirtbike": 2000,
     # Superette
     "Sewing_kit": 480,
+    # Packs
+    "pack_blindage_leger_rager": 25000,
+    "pack_blindage_leger_volkswagen": 15000,
+    "pack_blindage_leger_laika": 15000,
+    "pack_quad_basic": 5000,
+    "pack_blindage_lourd_rager": 50000,
+    "pack_blindage_lourd_volkswagen": 35000,
+    "pack_blindage_lourd_laika": 35000,
+    "pack_blindage_lourd_tracteur": 25000,
+    "pack_quad_militaire": 15000,
 }
 
 # Items par métier
@@ -69,6 +79,17 @@ METIER_ITEMS = {
     "garage": {
         "materials": ["Car_Repair_Kit", "Gasoline_Canister", "Big_Vehicle_StorageRack", "Medium_Vehicle_StorageRack", "Small_Vehicle_StorageRack"],
         "vehicles": ["BPC_WolfsWagen", "BPC_Laika", "BPC_Rager", "BPC_RIS", "BPC_Tractor"],
+        "packs": [
+            "pack_blindage_leger_rager",
+            "pack_blindage_leger_volkswagen",
+            "pack_blindage_leger_laika",
+            "pack_quad_basic",
+            "pack_blindage_lourd_rager",
+            "pack_blindage_lourd_volkswagen",
+            "pack_blindage_lourd_laika",
+            "pack_blindage_lourd_tracteur",
+            "pack_quad_militaire"
+        ],
     },
     "moto": {
         "materials": ["Car_Repair_Kit", "Gasoline_Canister"],
@@ -108,14 +129,14 @@ DELIVERY_POSITIONS = {
     "Z4 - Piste proche bunker": (437363.6906, 560133.7958, 0)
 }
 
-# Positions de livraison par marchand
+# Positions de livraison par marchand (À REMPLACER PAR LES TUES)
 MERCHANT_DELIVERY_POSITIONS = {
     "garage": (-41297.051, -121472.367, 35180.148),
     "moto": (-41297.051, -121472.367, 35180.148),
-    "armurerie": (0, 0, 0),  # À définir
-    "quincaillerie": (0, 0, 0),  # À définir
-    "restaurateur": (0, 0, 0),  # À définir
-    "superette": (0, 0, 0)  # À définir
+    "armurerie": (123456.789, -654321.0, 0),  # Remplace par les vraies coordonnées
+    "quincaillerie": (123456.789, -654321.0, 0),  # Remplace par les vraies coordonnées
+    "restaurateur": (123456.789, -654321.0, 0),  # Remplace par les vraies coordonnées
+    "superette": (123456.789, -654321.0, 0)  # Remplace par les vraies coordonnées
 }
 
 # Messages d'annonce
@@ -155,3 +176,47 @@ INSTANT_VEHICLE_POSITION = (-46050.273, -119181.414, 32178.090)
 
 # Délai de livraison (20 minutes)
 DELIVERY_TIME = 20 * 60
+
+# Liste des items par pack
+PACK_ITEMS = {
+    "pack_blindage_leger_rager": [
+        "Rager_Body_ArmorLight_Back_Item", "Rager_Body_ArmorLight_Left_Item", "Rager_Body_ArmorLight_Right_Item",
+        "Rager_Body_ArmorLight_Top_Item", "Rager_Door_ArmorLight_BackLeft_Item", "Rager_Door_ArmorLight_BackRight_Item",
+        "Rager_Door_ArmorLight_FrontLeft_Item", "Rager_Door_ArmorLight_FrontRight_Item", "Rager_DoorTrunk_ArmorLight_Item",
+        "Rager_Wheel_ArmorLight_FrontLeft_Item", "Rager_Wheel_ArmorLight_FrontRight_Item"
+    ],
+    "pack_blindage_leger_volkswagen": [
+        "WW_Bumper_Armor_Back_Item", "WW_Door_ArmorLight_BackLeft_Item", "WW_Door_ArmorLight_BackRight_Item",
+        "WW_Door_ArmorLight_FrontLeft_Item", "WW_Door_ArmorLight_FrontRight_Item", "WW_DoorTrunk_ArmorLight_Item"
+    ],
+    "pack_blindage_leger_laika": [
+        "Laika_Bumper_Armor_Back_Item", "Laika_Door_ArmorLight_FrontLeft_Item", "Laika_Door_ArmorLight_FrontRight_Item",
+        "Laika_Body_ArmorLight_Top", "Laika_Body_ArmorLight_Left", "Laika_Body_ArmorLight_Right", "Laika_DoorTrunk_ArmorLight_Item"
+    ],
+    "pack_quad_basic": [
+        "RIS_Bars_Civilian_Back_Item", "RIS_Bars_Civilian_Front_Item", "RIS_Hand_Guards_Civilian_Item", "RIS_Plow_Civilian"
+    ],
+    "pack_blindage_lourd_rager": [
+        "Rager_Body_ArmorHeavy_Back_Item", "Rager_Body_ArmorHeavy_Left_Item", "Rager_Body_ArmorHeavy_Right_Item",
+        "Rager_Body_ArmorHeavy_Top_Item", "Rager_Door_ArmorHeavy_BackLeft_Item", "Rager_Door_ArmorHeavy_BackRight_Item",
+        "Rager_Door_ArmorHeavy_FrontLeft_Item", "Rager_Door_ArmorHeavy_FrontRight_Item", "Rager_DoorTrunk_ArmorHeavy_Item",
+        "Rager_Wheel_ArmorLight_FrontLeft_Item", "Rager_Wheel_ArmorLight_FrontRight_Item"
+    ],
+    "pack_blindage_lourd_volkswagen": [
+        "WW_Bumper_Armor_Back_Item", "WW_Door_ArmorHeavy_BackLeft_Item", "WW_Door_ArmorHeavy_BackRight_Item",
+        "WW_Door_ArmorHeavy_FrontLeft_Item", "WW_Door_ArmorHeavy_FrontRight_Item", "WW_Body_ArmorHeavy_Top_Item",
+        "WW_DoorTrunk_ArmorHeavy_Item", "WW_Wheel_ArmorLight_FrontLeft_Item", "WW_Wheel_ArmorLight_FrontRight_Item"
+    ],
+    "pack_blindage_lourd_laika": [
+        "Laika_Bumper_Armor_Back_Item", "Laika_Door_ArmorHeavy_FrontLeft_Item", "Laika_Door_ArmorHeavy_FrontRight_Item",
+        "Laika_Body_ArmorHeavy_Top_Item", "Laika_Body_ArmorHeavy_Left", "Laika_Body_ArmorHeavy_Right", "Laika_DoorTrunk_ArmorHeavy_Item"
+    ],
+    "pack_blindage_lourd_tracteur": [
+        "Tractor_Body_Left_ArmorHeavy_Item", "Tractor_Body_Right_ArmorHeavy_Item", "Tractor_Body_Top_ArmorHeavy_Back_Item",
+        "Tractor_Body_Top_ArmorHeavy_Front_Item", "Tractor_Body_Top_ArmorHeavy_Left_Item", "Tractor_Body_Top_ArmorHeavy_Right_Item",
+        "Tractor_Door_Left_ArmorHeavy_Item", "Tractor_Door_Right_ArmorHeavy_Item", "Tractor_WheelArmorHeavy_Front_Item", "Tractor_WheelArmorHeavy_Front_Item"
+    ],
+    "pack_quad_militaire": [
+        "RIS_Armor_Military_Front_Item", "RIS_Body_Military_Item", "RIS_Hand_Guards_Civilian_Item", "RIS_Spikes_Military", "RIS_Wheel_Armor_Item"
+    ],
+}
